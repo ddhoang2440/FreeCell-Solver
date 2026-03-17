@@ -307,35 +307,24 @@ class FreeCellGame:
     
     def find_drop_target(self, pos):
         x, y = pos
-        
-        # 1. Kiểm tra Foundation (Các ô thu hoạch)
         for i, (suit, pile) in enumerate(self.current_state.foundations.items()):
             foundation_x = FOUNDATION_START_X + i * (CARD_WIDTH + CARD_PADDING)
             foundation_rect = pygame.Rect(foundation_x, FOUNDATION_START_Y, CARD_WIDTH, CARD_HEIGHT)
             if foundation_rect.collidepoint(x, y):
                 return ('foundation', suit)
-        
-        # 2. Kiểm tra Free Cells (Các ô trống phía trên)
         for i in range(4):
             cell_x = FREE_CELL_START_X + i * (CARD_WIDTH + CARD_PADDING)
             cell_rect = pygame.Rect(cell_x, FREE_CELL_START_Y, CARD_WIDTH, CARD_HEIGHT)
             if cell_rect.collidepoint(x, y):
                 return ('freecell', i)
-        
-        # 3. Kiểm tra Cascades (Các cột bài chính)
         for i in range(8):
-            # SỬ DỤNG CASCADE_SPACING ĐỂ ĐỒNG BỘ VỚI VỊ TRÍ VẼ
             cascade_x = CASCADE_START_X + i * CASCADE_SPACING
             cascade = self.current_state.cascades[i]
             
             if cascade:
-                # Tính toán vị trí lá bài cuối cùng
                 last_card_y = CASCADE_START_Y + (len(cascade) - 1) * 30
-                # TẠO VÙNG VA CHẠM RỘNG HƠN: 
-                # Bao gồm từ đầu cột đến tận cùng phía dưới màn hình để dễ thả bài
                 drop_rect = pygame.Rect(cascade_x, CASCADE_START_Y, CARD_WIDTH, SCREEN_HEIGHT - CASCADE_START_Y)
             else:
-                # Nếu cột trống, cho phép bấm vào ô trống đó
                 drop_rect = pygame.Rect(cascade_x, CASCADE_START_Y, CARD_WIDTH, CARD_HEIGHT + 100)
             
             if drop_rect.collidepoint(x, y):
