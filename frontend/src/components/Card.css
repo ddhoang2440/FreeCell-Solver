@@ -1,0 +1,51 @@
+.card {
+  position: absolute;
+  background: white;
+  border-radius: 8px;
+  border: 2px solid #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+  user-select: none;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.card.red {
+  color: #ff4444;
+}
+
+.card.black {
+  color: #333;
+}
+
+.card-corner {
+  position: absolute;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.card-corner.top-left {
+  top: 5px;
+  left: 5px;
+}
+
+.card-corner.bottom-right {
+  bottom: 5px;
+  right: 5px;
+  transform: rotate(180deg);
+}
+
+.card-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 40px;
+}

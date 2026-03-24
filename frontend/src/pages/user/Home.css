@@ -1,0 +1,155 @@
+.home-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a4d1a 0%, #2d6a2d 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.home-title {
+  font-size: 64px;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 4px 4px 0px #000000;
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+.home-subtitle {
+  font-size: 24px;
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+.home-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.home-card-title {
+  color: #1a4d1a;
+  margin: 0 0 30px 0;
+  font-size: 32px;
+  text-align: center;
+}
+
+.input-group {
+  margin-bottom: 30px;
+}
+
+.input-label {
+  display: block;
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.seed-input {
+  width: 100%;
+  padding: 15px;
+  font-size: 18px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  transition: border-color 0.3s;
+}
+
+.seed-input:focus {
+  outline: none;
+  border-color: #ffd700;
+}
+
+.input-hint {
+  font-size: 14px;
+  color: #666;
+  margin-top: 8px;
+}
+
+.new-game-button {
+  width: 100%;
+  padding: 18px;
+  font-size: 20px;
+  font-weight: bold;
+  background: #ffd700;
+  color: #1a4d1a;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 30px;
+}
+
+.new-game-button:hover:not(:disabled) {
+  background: #ffed4a;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+}
+
+.new-game-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.info-section {
+  border-top: 2px solid #eee;
+  padding-top: 20px;
+}
+
+.info-section h3 {
+  color: #1a4d1a;
+  margin: 15px 0 10px 0;
+  font-size: 20px;
+}
+
+.info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+.info-list li {
+  padding: 8px 0;
+  padding-left: 24px;
+  position: relative;
+  color: #555;
+  line-height: 1.5;
+}
+
+.info-list li:before {
+  content: "•";
+  color: #ffd700;
+  font-weight: bold;
+  position: absolute;
+  left: 8px;
+}
+
+.info-list li strong {
+  color: #1a4d1a;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
