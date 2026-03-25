@@ -5,7 +5,7 @@ from card import Card, Suit, microsoft_deal
 class FreeCellState:
     __slots__ = (
         'seed', 'cascades', 'free_cells', 'foundations', 
-        'move_history', '_hash', '_cached_moves',
+        'move_history', '_hash', '_cached_moves','_cached_moves_with_foundation',
         '_cached_empty_free_cells', '_cached_empty_cascades',
         '_cached_cards_not_in_foundation', '_cached_blocked_count'
     )
@@ -24,6 +24,7 @@ class FreeCellState:
         
         self._hash = None
         self._cached_moves = None
+        self._cached_moves_with_foundation = None
         self._cached_empty_free_cells = None
         self._cached_empty_cascades = None
         self._cached_cards_not_in_foundation = None
@@ -40,6 +41,7 @@ class FreeCellState:
     def _invalidate_cache(self):
         self._hash = None
         self._cached_moves = None
+        self._cached_moves_with_foundation = None
         self._cached_empty_free_cells = None
         self._cached_empty_cascades = None
         self._cached_cards_not_in_foundation = None
@@ -149,7 +151,7 @@ class FreeCellState:
         usable_empty_cascades = max(0, usable_empty_cascades)
         
         return (1 + empty_free) * (1 << usable_empty_cascades)
-    def _compute_all_moves(self) -> List[Tuple]:
+    def _compute_all_moves(self, include_foundation_moves: bool = False) -> List[Tuple]:
         moves = []
 
         empty_free = [i for i, c in enumerate(self.free_cells) if c is None]
@@ -199,6 +201,7 @@ class FreeCellState:
                     continue
                 if card.can_place_on(dest[-1]):
                     moves.append(('cascade_to_cascade', i, j))
+        
         empty_free_count = len(empty_free)
         empty_casc_count = len(empty_casc)
 
@@ -236,20 +239,280 @@ class FreeCellState:
                         if sub_seq[0].can_place_on(dest[-1]):
                             moves.append(('cascade_to_cascade_sequence', i, j, length))
 
+        if include_foundation_moves:
+            moves.extend(self._get_foundation_moves(empty_free, empty_casc))
+
         return moves
 
-    def get_all_moves(self) -> List[Tuple]:
-        if self._cached_moves is None:
-            self._cached_moves = self._compute_all_moves()
-        return self._cached_moves
-    
+    def _get_foundation_moves(self, empty_free: List[int], empty_casc: List[int]) -> List[Tuple]:
+        moves = []
+        
+        total_foundation_cards = sum(len(pile) for pile in self.foundations.values())
+        if total_foundation_cards == 0:
+            return moves
+        
+        for suit, pile in self.foundations.items():
+            if not pile:
+                continue
+                
+            card = pile[-1]
+            
+            # if card.rank.value <= 2:
+            #     if not self._should_take_low_card(card):
+            #         continue
+            
+            for free_idx in empty_free:
+                moves.append(('foundation_to_freecell', suit.name, free_idx))
+            
+            for cascade_idx, cascade in enumerate(self.cascades):
+                if not cascade:
+                    # Đặt vào cascade trống
+                    if cascade_idx in empty_casc:
+                        moves.append(('foundation_to_cascade', suit.name, cascade_idx))
+                elif card.can_place_on(cascade[-1]):
+                    # if self._is_beneficial_placement(card, cascade[-1]):
+                        moves.append(('foundation_to_cascade', suit.name, cascade_idx))
+        
+        return moves
+
+    def _should_take_low_card(self, card: Card) -> bool:
+        for suit, pile in self.foundations.items():
+            if pile and pile[-1].rank.value == card.rank.value + 1:
+                return True
+        return False
+
+    def _is_beneficial_placement(self, card_from_foundation: Card, dest_top_card: Card) -> bool:
+        if card_from_foundation.rank.value == dest_top_card.rank.value - 1:
+            return True
+        return False
+
+    def get_all_moves(self, include_foundation_moves: bool = False) -> List[Tuple]:
+        if include_foundation_moves:
+            if self._cached_moves_with_foundation is None:
+                self._cached_moves_with_foundation = self._compute_all_moves(True)
+            return self._cached_moves_with_foundation
+        else:
+            if self._cached_moves is None:
+                self._cached_moves = self._compute_all_moves(False)
+            return self._cached_moves
+
+
+    # def _compute_all_moves(self) -> List[Tuple]:
+    #     moves = []
+
+    #     empty_free = [i for i, c in enumerate(self.free_cells) if c is None]
+    #     empty_casc = [i for i, c in enumerate(self.cascades) if not c]
+
+    #     first_empty_free = empty_free[0] if empty_free else None
+    #     first_empty_casc = empty_casc[0] if empty_casc else None
+
+    #     for i, cascade in enumerate(self.cascades):
+    #         if not cascade:
+    #             continue
+    #         card = cascade[-1]
+    #         if card and card.can_place_on_foundation(self.foundations.get(card.suit, [])):
+    #             moves.append(('cascade_to_foundation', i))
+
+    #     for i, card in enumerate(self.free_cells):
+    #         if card and card.can_place_on_foundation(self.foundations.get(card.suit, [])):
+    #             moves.append(('freecell_to_foundation', i))
+
+    #     for i, card in enumerate(self.free_cells):
+    #         if not card:
+    #             continue
+
+    #         if first_empty_casc is not None:
+    #             moves.append(('freecell_to_cascade', i, first_empty_casc))
+
+    #         for j, dest in enumerate(self.cascades):
+    #             if dest and card.can_place_on(dest[-1]):
+    #                 moves.append(('freecell_to_cascade', i, j))
+
+    #     if first_empty_free is not None:
+    #         for i, cascade in enumerate(self.cascades):
+    #             if cascade:
+    #                 moves.append(('cascade_to_freecell', i, first_empty_free))
+
+    #     for i, src in enumerate(self.cascades):
+    #         if not src:
+    #             continue
+
+    #         card = src[-1]
+
+    #         if first_empty_casc is not None and i != first_empty_casc:
+    #             moves.append(('cascade_to_cascade', i, first_empty_casc))
+
+    #         for j, dest in enumerate(self.cascades):
+    #             if i == j or not dest:
+    #                 continue
+    #             if card.can_place_on(dest[-1]):
+    #                 moves.append(('cascade_to_cascade', i, j))
+    #     empty_free_count = len(empty_free)
+    #     empty_casc_count = len(empty_casc)
+
+    #     for i, src in enumerate(self.cascades):
+    #         if len(src) < 2:
+    #             continue
+    #         valid_seq_in_src = [src[-1]]
+    #         for k in range(len(src) - 2, -1, -1):
+    #             if src[k+1].can_place_on(src[k]):
+    #                 valid_seq_in_src.insert(0, src[k])
+    #             else:
+    #                 break
+            
+    #         max_seq_len = len(valid_seq_in_src)
+    #         if max_seq_len < 2:
+    #             continue
+
+    #         for j, dest in enumerate(self.cascades):
+    #             if i == j: continue
+                
+    #             is_dest_empty = not dest
+    #             eff_empty_casc = empty_casc_count - 1 if is_dest_empty else empty_casc_count
+    #             max_allowed = (1 + empty_free_count) * (1 << max(0, eff_empty_casc))
+
+    #             for length in range(2, max_seq_len + 1):
+    #                 if length > max_allowed:
+    #                     break 
+                    
+    #                 sub_seq = valid_seq_in_src[-length:]
+                    
+    #                 if is_dest_empty:
+    #                     if j == first_empty_casc:
+    #                         moves.append(('cascade_to_cascade_sequence', i, j, length))
+    #                 else:
+    #                     if sub_seq[0].can_place_on(dest[-1]):
+    #                         moves.append(('cascade_to_cascade_sequence', i, j, length))
+
+    #     return moves
+
+    # def get_all_moves(self) -> List[Tuple]:
+    #     if self._cached_moves is None:
+    #         self._cached_moves = self._compute_all_moves()
+    #     return self._cached_moves
+
+    # def apply_move(self, move: Tuple) -> 'FreeCellState | None':
+    #     new_state = FreeCellState.__new__(FreeCellState)
+
+    #     new_state.cascades = [c[:] for c in self.cascades]
+    #     new_state.free_cells = self.free_cells[:]
+    #     new_state.foundations = {s: v[:] for s, v in self.foundations.items()}
+    #     # new_state.move_history = self.move_history + [move]
+    #     new_state.seed = self.seed
+
+    #     new_state._invalidate_cache()
+    #     detailed_move = None
+    #     move_type = move[0]
+
+    #     if move_type == 'cascade_to_freecell':
+    #         _, c_idx, f_idx = move
+    #         if not new_state.cascades[c_idx]:
+    #             return None
+    #         if new_state.free_cells[f_idx] is not None:
+    #             return None
+
+    #         card = new_state.cascades[c_idx].pop()
+    #         new_state.free_cells[f_idx] = card
+    #         card_data = {'suit': card.suit.name, 'rank': card.rank.value}
+    #         detailed_move = (move_type, c_idx, f_idx,card_data)
+    #         new_state.move_history = self.move_history + [detailed_move]
+
+    #     elif move_type == 'freecell_to_cascade':
+    #         _, f_idx, c_idx = move
+    #         card = new_state.free_cells[f_idx]
+    #         if card is None:
+    #             return None
+
+    #         dest = new_state.cascades[c_idx]
+    #         if dest and not card.can_place_on(dest[-1]):
+    #             return None
+
+    #         new_state.free_cells[f_idx] = None
+    #         dest.append(card)
+    #         card_data = {'suit': card.suit.name, 'rank': card.rank.value}
+    #         detailed_move = (move_type, c_idx, f_idx, card_data)
+    #         new_state.move_history = self.move_history + [detailed_move]
+
+    #     elif move_type == 'cascade_to_cascade':
+    #         _, src, dst = move
+    #         if not new_state.cascades[src]:
+    #             return None
+
+    #         card = new_state.cascades[src][-1]
+    #         dest = new_state.cascades[dst]
+
+    #         if dest and not card.can_place_on(dest[-1]):
+    #             return None
+
+    #         new_state.cascades[src].pop()
+    #         dest.append(card)
+    #         card_data = {'suit': card.suit.name, 'rank': card.rank.value}
+    #         detailed_move = (move_type, src, dst, card_data)
+    #         new_state.move_history = self.move_history + [detailed_move]
+
+    #     elif move_type == 'cascade_to_foundation':
+    #         _, idx = move
+    #         if not new_state.cascades[idx]:
+    #             return None
+
+    #         card = new_state.cascades[idx][-1]
+    #         foundation = new_state.foundations.get(card.suit, [])
+
+    #         if not card.can_place_on_foundation(foundation):
+    #             return None
+
+    #         new_state.cascades[idx].pop()
+    #         foundation.append(card)
+    #         new_state.foundations[card.suit] = foundation
+    #         card_data = {'suit': card.suit.name, 'rank': card.rank.value}
+    #         detailed_move = (move_type, idx, card_data)
+    #         new_state.move_history = self.move_history + [detailed_move]
+
+    #     elif move_type == 'freecell_to_foundation':
+    #         _, idx = move
+    #         card = new_state.free_cells[idx]
+    #         if card is None:
+    #             return None
+
+    #         foundation = new_state.foundations.get(card.suit, [])
+    #         if not card.can_place_on_foundation(foundation):
+    #             return None
+
+    #         new_state.free_cells[idx] = None
+    #         foundation.append(card)
+    #         new_state.foundations[card.suit] = foundation
+    #         card_data = {'suit': card.suit.name, 'rank': card.rank.value}
+    #         detailed_move = (move_type, idx, card_data)
+    #         new_state.move_history = self.move_history + [detailed_move]
+
+    #     elif move_type == 'cascade_to_cascade_sequence':
+    #         _, src, dst, length = move
+
+    #         src_c = new_state.cascades[src]
+    #         if length <= 0 or length > len(src_c):
+    #             return None
+
+    #         seq = src_c[-length:]
+    #         if any(card is None for card in seq):
+    #             return None
+
+    #         dest = new_state.cascades[dst]
+    #         if dest and not seq[0].can_place_on(dest[-1]):
+    #             return None
+
+    #         new_state.cascades[src] = src_c[:-length]
+    #         dest.extend(seq)
+    #         sequence_data = [{'suit': c.suit.name, 'rank': c.rank.value} for c in seq]
+    #         detailed_move = (move_type, src, dst,length, sequence_data)
+    #         new_state.move_history = self.move_history + [detailed_move]
+
+    #     return new_state
     def apply_move(self, move: Tuple) -> 'FreeCellState | None':
         new_state = FreeCellState.__new__(FreeCellState)
 
         new_state.cascades = [c[:] for c in self.cascades]
         new_state.free_cells = self.free_cells[:]
         new_state.foundations = {s: v[:] for s, v in self.foundations.items()}
-        # new_state.move_history = self.move_history + [move]
         new_state.seed = self.seed
 
         new_state._invalidate_cache()
@@ -266,8 +529,8 @@ class FreeCellState:
             card = new_state.cascades[c_idx].pop()
             new_state.free_cells[f_idx] = card
             card_data = {'suit': card.suit.name, 'rank': card.rank.value}
-            detailed_move = (move_type, c_idx, f_idx,card_data)
-            new_state.move_history = self.move_history + [detailed_move]
+            detailed_move = (move_type, c_idx, f_idx, card_data)
+            new_state.move_history = self.move_history + [detailed_move] if hasattr(self, 'move_history') else [detailed_move]
 
         elif move_type == 'freecell_to_cascade':
             _, f_idx, c_idx = move
@@ -283,7 +546,7 @@ class FreeCellState:
             dest.append(card)
             card_data = {'suit': card.suit.name, 'rank': card.rank.value}
             detailed_move = (move_type, c_idx, f_idx, card_data)
-            new_state.move_history = self.move_history + [detailed_move]
+            new_state.move_history = self.move_history + [detailed_move] if hasattr(self, 'move_history') else [detailed_move]
 
         elif move_type == 'cascade_to_cascade':
             _, src, dst = move
@@ -300,7 +563,7 @@ class FreeCellState:
             dest.append(card)
             card_data = {'suit': card.suit.name, 'rank': card.rank.value}
             detailed_move = (move_type, src, dst, card_data)
-            new_state.move_history = self.move_history + [detailed_move]
+            new_state.move_history = self.move_history + [detailed_move] if hasattr(self, 'move_history') else [detailed_move]
 
         elif move_type == 'cascade_to_foundation':
             _, idx = move
@@ -318,7 +581,7 @@ class FreeCellState:
             new_state.foundations[card.suit] = foundation
             card_data = {'suit': card.suit.name, 'rank': card.rank.value}
             detailed_move = (move_type, idx, card_data)
-            new_state.move_history = self.move_history + [detailed_move]
+            new_state.move_history = self.move_history + [detailed_move] if hasattr(self, 'move_history') else [detailed_move]
 
         elif move_type == 'freecell_to_foundation':
             _, idx = move
@@ -335,7 +598,7 @@ class FreeCellState:
             new_state.foundations[card.suit] = foundation
             card_data = {'suit': card.suit.name, 'rank': card.rank.value}
             detailed_move = (move_type, idx, card_data)
-            new_state.move_history = self.move_history + [detailed_move]
+            new_state.move_history = self.move_history + [detailed_move] if hasattr(self, 'move_history') else [detailed_move]
 
         elif move_type == 'cascade_to_cascade_sequence':
             _, src, dst, length = move
@@ -355,9 +618,45 @@ class FreeCellState:
             new_state.cascades[src] = src_c[:-length]
             dest.extend(seq)
             sequence_data = [{'suit': c.suit.name, 'rank': c.rank.value} for c in seq]
-            detailed_move = (move_type, src, dst,length, sequence_data)
-            new_state.move_history = self.move_history + [detailed_move]
+            detailed_move = (move_type, src, dst, length, sequence_data)
+            new_state.move_history = self.move_history + [detailed_move] if hasattr(self, 'move_history') else [detailed_move]
 
+        elif move_type == 'foundation_to_freecell':
+            _, suit_name, free_idx = move
+            from card import Suit
+            suit = Suit[suit_name]
+            foundation_pile = new_state.foundations.get(suit, [])
+            if not foundation_pile:
+                return None
+            print("hu")
+            card = foundation_pile[-1]
+            if new_state.free_cells[free_idx] is not None:
+                return None
+            print("lmao")
+            foundation_pile.pop()
+            new_state.free_cells[free_idx] = card
+            card_data = {'suit': card.suit.name, 'rank': card.rank.value}
+            detailed_move = ('foundation_to_freecell', suit.name, free_idx, card_data)
+            new_state.move_history = self.move_history + [detailed_move] if hasattr(self, 'move_history') else [detailed_move]
+
+        elif move_type == 'foundation_to_cascade':
+            _, suit_name, cascade_idx = move
+            from card import Suit
+            suit = Suit[suit_name]
+            foundation_pile = new_state.foundations.get(suit, [])
+            if not foundation_pile:
+                return None
+            
+            card = foundation_pile[-1] 
+            dest = new_state.cascades[cascade_idx]
+            if dest and not card.can_place_on(dest[-1]):
+                return None
+            
+            foundation_pile.pop()
+            dest.append(card)
+            card_data = {'suit': card.suit.name, 'rank': card.rank.value}
+            detailed_move = ('foundation_to_cascade', suit.name, cascade_idx, card_data)
+            new_state.move_history = self.move_history + [detailed_move] if hasattr(self, 'move_history') else [detailed_move]
         return new_state
 
     def is_goal(self) -> bool:

@@ -129,7 +129,7 @@ def make_move(game_id):
     state = game['state']
     
     move_tuple = tuple(move)
-    all_moves = state.get_all_moves()
+    all_moves = state.get_all_moves(True)
     print("all moves",all_moves)
     if move_tuple not in all_moves:
         return jsonify({'success': False, 'error': 'Invalid move'}), 400

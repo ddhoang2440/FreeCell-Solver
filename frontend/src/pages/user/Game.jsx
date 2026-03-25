@@ -435,7 +435,7 @@ const Game = () => {
 
     if (!clicked || !clicked.card) return;
 
-    if (clicked.type === "foundation") return;
+    // if (clicked.type === "foundation") return;
 
     console.log("Start drag:", clicked);
 
@@ -478,6 +478,29 @@ const Game = () => {
         index: clicked.index,
       });
       setStatusMessage(`Dragging from freecell`);
+    } else if (clicked.type === "foundation") {
+      // Thêm drag từ foundation
+      // Chỉ cho phép drag card cuối cùng của foundation pile
+      const foundationPile = gameState.foundations[clicked.card.suit];
+      if (
+        foundationPile &&
+        foundationPile.length > 0 &&
+        foundationPile[foundationPile.length - 1].rank === clicked.card.rank &&
+        foundationPile[foundationPile.length - 1].suit === clicked.card.suit
+      ) {
+        setSelectedCards([clicked.card]);
+        setDragSource({
+          type: "foundation",
+          index: clicked.index, // index là suit index
+          suit: clicked.card.suit,
+        });
+        setStatusMessage(
+          `Dragging from foundation: ${clicked.card.rank} of ${clicked.card.suit}`,
+        );
+      } else {
+        setStatusMessage("Cannot drag this card from foundation");
+        return;
+      }
     }
 
     const cardRect = getCardRect(clicked);
@@ -492,6 +515,28 @@ const Game = () => {
 
     setDragging(true);
   };
+  // const getCardRect = (clicked) => {
+  //   if (!clicked || !clicked.card) return null;
+
+  //   if (clicked.type === "cascade") {
+  //     const cascade = gameState?.cascades[clicked.index] || [];
+  //     const offsetY = Math.min(30, Math.floor(400 / (cascade.length + 1)));
+  //     return {
+  //       x: CASCADE_START_X + clicked.index * CASCADE_SPACING,
+  //       y: CASCADE_START_Y + clicked.row * offsetY,
+  //       width: CARD_WIDTH,
+  //       height: CARD_HEIGHT,
+  //     };
+  //   } else if (clicked.type === "freecell") {
+  //     return {
+  //       x: FREE_CELL_START_X + clicked.index * (CARD_WIDTH + CARD_PADDING),
+  //       y: FREE_CELL_START_Y,
+  //       width: CARD_WIDTH,
+  //       height: CARD_HEIGHT,
+  //     };
+  //   }
+  //   return null;
+  // };
   const getCardRect = (clicked) => {
     if (!clicked || !clicked.card) return null;
 
@@ -511,10 +556,20 @@ const Game = () => {
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
       };
+    } else if (clicked.type === "foundation") {
+      // Thêm foundation rect
+      const suitIndex = ["SPADES", "HEARTS", "CLUBS", "DIAMONDS"].indexOf(
+        clicked.suit,
+      );
+      return {
+        x: FOUNDATION_START_X + suitIndex * (CARD_WIDTH + CARD_PADDING),
+        y: FOUNDATION_START_Y,
+        width: CARD_WIDTH,
+        height: CARD_HEIGHT,
+      };
     }
     return null;
   };
-
   const handleMouseMove = (e) => {
     if (!dragging || !boardRef.current) return;
 
@@ -534,6 +589,7 @@ const Game = () => {
 
     return cardColor !== belowColor && card.rank === belowCard.rank - 1;
   };
+
   const handleMouseUp = (e) => {
     if (!dragging || !dragSource || !boardRef.current) return;
 
@@ -549,7 +605,32 @@ const Game = () => {
     if (target && selectedCards.length > 0) {
       let move = null;
 
-      if (dragSource.type === "cascade_sequence") {
+      // Xử lý drag từ foundation
+      if (dragSource.type === "foundation") {
+        if (selectedCards.length === 1) {
+          if (target.type === "cascade" || target.type === "cascade_empty") {
+            // Foundation to cascade
+            move = ["foundation_to_cascade", dragSource.suit, target.index];
+            console.log(`Moving from foundation to cascade ${target.index}`);
+          } else if (target.type === "freecell") {
+            // Foundation to freecell
+            if (!gameState?.free_cells[target.index]) {
+              move = ["foundation_to_freecell", dragSource.suit, target.index];
+              console.log(`Moving from foundation to freecell ${target.index}`);
+            } else {
+              setStatusMessage("❌ Free cell is not empty");
+            }
+          } else {
+            setStatusMessage(
+              "❌ Can only drop foundation cards to cascade or freecell",
+            );
+          }
+        } else {
+          setStatusMessage("❌ Can only drag single card from foundation");
+        }
+      }
+      // Xử lý drag từ cascade_sequence
+      else if (dragSource.type === "cascade_sequence") {
         if (target.type === "cascade" || target.type === "cascade_empty") {
           if (dragSource.index !== target.index) {
             const destCascade = gameState?.cascades[target.index];
@@ -579,7 +660,9 @@ const Game = () => {
         } else {
           setStatusMessage("Sequence can only be dropped to cascade");
         }
-      } else if (dragSource.type === "cascade") {
+      }
+      // Xử lý drag từ cascade
+      else if (dragSource.type === "cascade") {
         if (selectedCards.length === 1) {
           if (target.type === "cascade" || target.type === "cascade_empty") {
             if (dragSource.index !== target.index) {
@@ -593,7 +676,9 @@ const Game = () => {
             move = ["cascade_to_foundation", dragSource.index];
           }
         }
-      } else if (dragSource.type === "freecell") {
+      }
+      // Xử lý drag từ freecell
+      else if (dragSource.type === "freecell") {
         if (target.type === "cascade" || target.type === "cascade_empty") {
           move = ["freecell_to_cascade", dragSource.index, target.index];
         } else if (target.type === "freecell") {
@@ -622,6 +707,94 @@ const Game = () => {
     setSelectedCards([]);
     setDragSource(null);
   };
+  // const handleMouseUp = (e) => {
+  //   if (!dragging || !dragSource || !boardRef.current) return;
+
+  //   const rect = boardRef.current.getBoundingClientRect();
+  //   const x = e.clientX - rect.left;
+  //   const y = e.clientY - rect.top;
+
+  //   const target = getCardAtPosition(x, y);
+  //   console.log("target", target);
+  //   console.log("dragSource", dragSource);
+  //   console.log("selectedCards", selectedCards);
+
+  //   if (target && selectedCards.length > 0) {
+  //     let move = null;
+
+  //     if (dragSource.type === "cascade_sequence") {
+  //       if (target.type === "cascade" || target.type === "cascade_empty") {
+  //         if (dragSource.index !== target.index) {
+  //           const destCascade = gameState?.cascades[target.index];
+  //           const firstCard = selectedCards[0];
+  //           console.log("destCascade", destCascade);
+  //           const canPlace =
+  //             !destCascade?.length ||
+  //             canPlaceOn(firstCard, destCascade[destCascade.length - 1]);
+
+  //           const maxSequenceLength = gameState?.max_sequence_length;
+  //           console.log("maxSequenceLength", maxSequenceLength);
+  //           console.log("canPlace", canPlace);
+  //           if (selectedCards.length <= maxSequenceLength && canPlace) {
+  //             move = [
+  //               "cascade_to_cascade_sequence",
+  //               dragSource.index,
+  //               target.index,
+  //               selectedCards.length,
+  //             ];
+  //             console.log(`Moving sequence of ${selectedCards.length} cards`);
+  //           } else {
+  //             setStatusMessage(
+  //               `Cannot move ${selectedCards.length} cards! Max: ${maxSequenceLength}`,
+  //             );
+  //           }
+  //         }
+  //       } else {
+  //         setStatusMessage("Sequence can only be dropped to cascade");
+  //       }
+  //     } else if (dragSource.type === "cascade") {
+  //       if (selectedCards.length === 1) {
+  //         if (target.type === "cascade" || target.type === "cascade_empty") {
+  //           if (dragSource.index !== target.index) {
+  //             move = ["cascade_to_cascade", dragSource.index, target.index];
+  //           }
+  //         } else if (target.type === "freecell") {
+  //           if (!gameState?.free_cells[target.index]) {
+  //             move = ["cascade_to_freecell", dragSource.index, target.index];
+  //           }
+  //         } else if (target.type === "foundation") {
+  //           move = ["cascade_to_foundation", dragSource.index];
+  //         }
+  //       }
+  //     } else if (dragSource.type === "freecell") {
+  //       if (target.type === "cascade" || target.type === "cascade_empty") {
+  //         move = ["freecell_to_cascade", dragSource.index, target.index];
+  //       } else if (target.type === "freecell") {
+  //         if (
+  //           dragSource.index !== target.index &&
+  //           !gameState?.free_cells[target.index]
+  //         ) {
+  //           move = ["freecell_to_freecell", dragSource.index, target.index];
+  //         }
+  //       } else if (target.type === "foundation") {
+  //         move = ["freecell_to_foundation", dragSource.index];
+  //       }
+  //     }
+
+  //     if (move) {
+  //       console.log("Sending move:", move);
+  //       makeMove(move);
+  //     } else {
+  //       setStatusMessage("❌ Invalid move");
+  //     }
+  //   } else {
+  //     setStatusMessage("❌ Invalid drop target");
+  //   }
+
+  //   setDragging(false);
+  //   setSelectedCards([]);
+  //   setDragSource(null);
+  // };
   const renderCard = (card, isDragged = false) => {
     if (!card) return null;
 
