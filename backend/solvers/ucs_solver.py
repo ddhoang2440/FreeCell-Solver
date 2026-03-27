@@ -118,17 +118,16 @@ class UCSSolver(BaseSolver):
     # ------------------------------------------------------------------ #
     #  Main search                                                         #
     # ------------------------------------------------------------------ #
-    def solve(self, max_nodes: int = 150_000, max_time: int = 60) -> Optional[List[Tuple]]:
+    def solve(self, max_nodes: float = float('inf'), max_time: int = 86400) -> Optional[List[Tuple]]:
         """
         UCS search for a FreeCell solution.
 
         Args:
-            max_nodes: Abort after expanding this many nodes (default 150 000).
-            max_time:  Abort after this many seconds (default 60).
+            max_nodes: Abort after expanding this many nodes (default: unlimited).
+            max_time:  Abort after this many seconds (default: 24h — effectively unlimited).
 
         Returns:
-            List of moves leading to a solved board, or None if not found
-            within the resource limits.
+            List of moves leading to a solved board, or None if no solution exists.
         """
         # --- Reset state ---------------------------------------------------
         self.priority_queue.clear()
@@ -146,7 +145,7 @@ class UCSSolver(BaseSolver):
         counter = 0
         heapq.heappush(self.priority_queue, (0, counter, self.initial_state, []))
 
-        print(f"[UCS] Starting search — limits: {max_nodes:,} nodes / {max_time}s")
+        print(f"[UCS] Starting search — no node/time limits (will run until solution found)")
 
         # --- Search loop ---------------------------------------------------
         while self.priority_queue and self.expanded_nodes < max_nodes:
