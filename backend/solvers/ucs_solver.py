@@ -22,18 +22,21 @@ class UCSSolver(BaseSolver):
     """
 
     # ------------------------------------------------------------------ #
-    #  Move cost table                                                     #
+    #  Bảng chi phí cơ sở theo loại nước đi                              #
     # ------------------------------------------------------------------ #
-    _MOVE_COST: Dict[str, int] = {
-        'cascade_to_foundation':        0,   # Always beneficial — free
-        'freecell_to_foundation':       0,   # Always beneficial — free
-        'cascade_to_cascade_sequence':  1,   # Moving a group is efficient
-        'freecell_to_cascade':          2,   # Frees a free-cell slot
-        'cascade_to_cascade':           3,   # Neutral single-card move
-        'cascade_to_freecell':          5,   # Consumes a free-cell slot
+    # Chi phí này là giá trị nền trước khi điều chỉnh theo ngữ cảnh.
+    # Nước đưa bài lên foundation luôn miễn phí (ưu tiên tuyệt đối).
+    # Các nước còn lại sẽ được cộng/trừ thêm dựa vào delta chất lượng state.
+    _BASE_COST: Dict[str, int] = {
+        'cascade_to_foundation':        0,   # Luôn có lợi — miễn phí
+        'freecell_to_foundation':       0,   # Luôn có lợi — miễn phí
+        'cascade_to_cascade_sequence':  2,   # Di nhóm — tiết kiệm tài nguyên
+        'freecell_to_cascade':          2,   # Giải phóng ô tạm — tốt
+        'cascade_to_cascade':           4,   # Di chuyển đơn — trung tính
+        'cascade_to_freecell':          6,   # Ngốn ô tạm — tốn kém
     }
 
-    # Move ordering priority (lower = explored first via sort)
+    # Thứ tự ưu tiên khi sắp xếp nước đi (giá trị nhỏ = thử trước)
     _MOVE_PRIORITY: Dict[str, int] = {
         'cascade_to_foundation':        0,
         'freecell_to_foundation':       0,
@@ -58,8 +61,68 @@ class UCSSolver(BaseSolver):
     # ------------------------------------------------------------------ #
     #  Cost & ordering helpers                                             #
     # ------------------------------------------------------------------ #
-    def _get_move_cost(self, move: Tuple) -> int:
-        return self._MOVE_COST.get(move[0], 3)
+    def _state_quality(self, state: 'FreeCellState') -> float:
+        """
+        Đo chất lượng tổng thể của một state — giá trị càng cao càng tốt.
+
+        Bốn thành phần:
+          [A] Tiến độ foundation  : mỗi lá lên foundation = +10 điểm
+          [B] Tài nguyên trống    : free cell trống = +3, cascade rỗng = +7
+          [C] Bài bị kẹt         : mỗi lá blocked = -4 điểm (phạt)
+          [D] Chuỗi có thứ tự     : mỗi lá liên tiếp đúng thứ tự ở cuối cột = +1
+        """
+        # [A] Tiến độ đưa bài lên foundation — quan trọng nhất
+        foundation_score = sum(len(p) for p in state.foundations.values()) * 10
+
+        # [B] Tài nguyên trống — càng nhiều chỗ trống, càng linh hoạt
+        resource_score = (state.get_empty_free_cells() * 3 +
+                          state.get_empty_cascades() * 7)
+
+        # [C] Phạt bài bị kẹt — bài không thể di chuyển làm tắc nghẽn
+        blocked_penalty = state.get_blocked_cards_count() * 4
+
+        # [D] Thưởng cho chuỗi đã sắp xếp đúng thứ tự ở cuối mỗi cột
+        sequence_bonus = 0
+        for cascade in state.cascades:
+            for i in range(len(cascade) - 1, 0, -1):
+                if cascade[i].can_place_on(cascade[i - 1]):
+                    sequence_bonus += 1
+                else:
+                    break
+
+        return foundation_score + resource_score - blocked_penalty + sequence_bonus
+
+    def _get_move_cost(self, move: Tuple,
+                       state_before: 'FreeCellState',
+                       state_after: 'FreeCellState') -> int:
+        """
+        Tính chi phí thực tế của một nước đi dựa vào ngữ cảnh state.
+
+        Công thức:
+            edge_cost = base_cost - (improvement // 2)
+            trong đó improvement = quality(state_after) - quality(state_before)
+
+        - Nước cải thiện state nhiều → improvement lớn → edge_cost nhỏ (thưởng)
+        - Nước làm state xấu đi     → improvement âm  → edge_cost lớn (phạt)
+        - Foundation moves           → luôn trả về 0 (ưu tiên tuyệt đối)
+        - Non-foundation moves       → tối thiểu = 1 (đảm bảo g(n) tăng nghiêm ngặt)
+        """
+        # Foundation moves luôn miễn phí — ưu tiên tuyệt đối trong UCS
+        if move[0] in ('cascade_to_foundation', 'freecell_to_foundation'):
+            return 0
+
+        base = self._BASE_COST.get(move[0], 4)
+
+        # Tính delta chất lượng giữa state trước và sau khi thực hiện move
+        q_before = self._state_quality(state_before)
+        q_after  = self._state_quality(state_after)
+        improvement = q_after - q_before   # Dương = state tốt hơn
+
+        # Điều chỉnh: improvement chia 2 để tránh thưởng/phạt quá mạnh
+        edge_cost = base - int(improvement // 2)
+
+        # Đảm bảo min=1: g(n) luôn tăng theo độ sâu, không có zero-cost plateau
+        return max(1, edge_cost)
 
     def _sort_moves(self, moves: List[Tuple], state: FreeCellState) -> List[Tuple]:
         """Sort moves by quality so better moves are pushed with lower tie-break counters."""
@@ -224,7 +287,8 @@ class UCSSolver(BaseSolver):
                 if new_hash in self.visited:
                     continue
 
-                new_cost = current_cost + self._get_move_cost(move)
+                # Tính edge weight theo ngữ cảnh: trước và sau khi apply move
+                new_cost = current_cost + self._get_move_cost(move, current_state, new_state)
 
                 # Only push if this is a strictly better (cheaper) path
                 if new_cost < self.cost_so_far.get(new_hash, float('inf')):
