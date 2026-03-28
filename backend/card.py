@@ -89,10 +89,24 @@ def create_deck() -> list:
     return deck
 
 def microsoft_deal(seed: int) -> list:
-    deck = create_deck()
-    random.seed(seed)
-    for i in range(len(deck) - 1, 0, -1):
-        j = random.randint(0, i)
-        deck[i], deck[j] = deck[j], deck[i]
+    # Bản đồ quy đổi index sang Suit và Rank chuẩn của MS FreeCell
+    suit_map = {0: Suit.CLUBS, 1: Suit.DIAMONDS, 2: Suit.HEARTS, 3: Suit.SPADES}
+    rank_map = {i: Rank(i + 1) for i in range(13)}
+
+    deck_indices = list(range(52))
+    state = seed
     
+    # MS FreeCell random generator (LCG)
+    for i in range(51, 0, -1):
+        state = (state * 214013 + 2531011) & 0x7FFFFFFF
+        swap = (state >> 16) % (i + 1)
+        deck_indices[i], deck_indices[swap] = deck_indices[swap], deck_indices[i]
+        
+    # MS FreeCell deals from the back of the deck
+    deck_indices.reverse()
+    
+    deck = []
+    for idx in deck_indices:
+        deck.append(Card(suit_map[idx % 4], rank_map[idx // 4]))
+        
     return deck
