@@ -3,7 +3,7 @@
     {
       "id": "01",
       "origin_seed": 11987,
-      "category": "super-easy",
+      "category": "easy",
       "description": "3 moves to win.",
       "state_data": {
         "cascades": [
@@ -28,7 +28,7 @@
     {
       "id": "02",
       "origin_seed": 25904,
-      "category": "super-easy",
+      "category": "easy",
       "description": "3 moves to win.",
       "state_data": {
         "cascades": [
@@ -53,7 +53,7 @@
     {
       "id": "03",
       "origin_seed": 11987,
-      "category": "super-easy",
+      "category": "easy",
       "description": "3 moves to win.",
       "state_data": {
         "cascades": [
@@ -78,23 +78,23 @@
     {
       "id": "01",
       "origin_seed": 25904,
-      "category": "easy",
+      "category": "medium",
       "description": "10 moves to win.",
       "state_data": {
         "cascades": [
-          [],
-          ["KH", "7C", "9D", "8S", "QC"],
-          ["10S", "9C", "10C", "JC", "10H", "9S"],
+          ["KS", "QH", "JS", "10D"],
+          ["KH", "7C", "9D"],
+          ["10S", "9C", "10C", "JC", "10H", "9S", "8H"],
           ["JH", "KC", "QD"],
-          ["6H", "KS", "7S", "8H"],
-          ["8C", "8D", "9H", "QH", "JS", "10D"],
+          ["QC"],
+          ["8C", "8D", "9H"],
           ["KD", "QS", "JD"],
-          ["7H"]
+          []
         ],
         "free_cells": [null, null, null, null],
         "foundations": {
-          "SPADES": 6,
-          "HEARTS": 5,
+          "SPADES": 8,
+          "HEARTS": 7,
           "CLUBS": 6,
           "DIAMONDS": 7
         }
@@ -103,7 +103,7 @@
     {
       "id": "02",
       "origin_seed": 5152,
-      "category": "easy",
+      "category": "medium",
       "description": "5 moves to win.",
       "state_data": {
         "cascades": [
@@ -128,7 +128,7 @@
     {
       "id": "03",
       "origin_seed": 11987,
-      "category": "easy",
+      "category": "medium",
       "description": "5 moves to win.",
       "state_data": {
         "cascades": [
@@ -147,6 +147,31 @@
           "HEARTS": 6,
           "CLUBS": 5,
           "DIAMONDS": 4
+        }
+      }
+    },
+    {
+      "id": "01",
+      "origin_seed": 25904,
+      "category": "hard",
+      "description": "10 moves to win.",
+      "state_data": {
+        "cascades": [
+          [],
+          ["KH", "7C", "9D", "8S", "QC"],
+          ["10S", "9C", "10C", "JC", "10H", "9S"],
+          ["JH", "KC", "QD"],
+          ["6H", "KS", "7S", "8H"],
+          ["8C", "8D", "9H", "QH", "JS", "10D"],
+          ["KD", "QS", "JD"],
+          ["7H"]
+        ],
+        "free_cells": [null, null, null, null],
+        "foundations": {
+          "SPADES": 6,
+          "HEARTS": 5,
+          "CLUBS": 6,
+          "DIAMONDS": 7
         }
       }
     },
