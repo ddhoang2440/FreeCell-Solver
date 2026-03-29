@@ -1,9 +1,9 @@
 {
   "test_cases": [
     {
-      "id": "test01_10_move_to_win",
+      "id": "01",
       "category": "easy",
-      "description": "State còn 10 bước nữa để thắng",
+      "description": "10 moves to win.",
       "state_data": {
         "cascades": [
           [],
