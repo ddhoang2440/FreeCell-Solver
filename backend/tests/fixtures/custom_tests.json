@@ -24,6 +24,31 @@
           "DIAMONDS": 7
         }
       }
+    },
+    {
+      "id": "02",
+      "origin_seed": 5152,
+      "category": "easy",
+      "description": "5 moves to win.",
+      "state_data": {
+        "cascades": [
+          ["KH", "QS"],
+          ["KD","QC","JH","10S"],
+          ["10D","9D","5C","9H","7C"],
+          ["QH","8C","8S","6D","8D"],
+          ["6H"],
+          ["KS","QD","JS","10H","9C","8H"],
+          ["KC","7H","JD","10C"],
+          ["9S","JC","7D","6C"]
+        ],
+        "free_cells": [null,null,null,null],
+        "foundations": {
+          "SPADES": 7,
+          "HEARTS": 5,
+          "CLUBS": 4,
+          "DIAMONDS": 5
+        }
+      }
     }
   ]
 }
