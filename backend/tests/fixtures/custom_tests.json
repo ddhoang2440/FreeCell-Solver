@@ -79,7 +79,7 @@
       "id": "01",
       "origin_seed": 25904,
       "category": "medium",
-      "description": "10 moves to win.",
+      "description": "5 moves to win.",
       "state_data": {
         "cascades": [
           ["KS", "QH", "JS", "10D"],
