@@ -18,6 +18,8 @@ from solvers.dfs_solver import DFSSolver
 from solvers.ucs_solver import UCSSolver
 from solvers.astar_solver import AStarSolver
 
+from test_parser import create_state_from_json, load_tests_config
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'freecell-solver-secret-key'
 
@@ -68,20 +70,54 @@ def state_to_dict(state: FreeCellState) -> Dict:
         'empty_cascades': num_empty_cascades,
         'seed': state.seed
     }
+@app.route('/api/custom-tests', methods=['GET'])
+def get_custom_tests():
+    try:
+        test_cases = load_tests_config()
+        # Chỉ trả về metadata, giấu state_data cho nhẹ Payload
+        metadata = []
+        for tc in test_cases:
+            metadata.append({
+                'id': tc.get('id', 'unknown'),
+                'category': tc.get('category', 'unknown'),
+                'description': tc.get('description', '')
+            })
+        return jsonify({'success': True, 'tests': metadata})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/api/new-game', methods=['POST'])
 def new_game():      
     try:
         data = request.get_json() or {}
-        seed = data.get('seed', 1)
+        test_id = data.get('test_id')
+        
         game_id = str(uuid.uuid4())
         
-        seed_int = int(seed)
-        state = FreeCellState(seed_int)
+        if test_id:
+            # Người dùng chọn Custom Test Map
+            test_cases = load_tests_config()
+            target_test = next((tc for tc in test_cases if tc.get('id') == test_id), None)
+            
+            if not target_test:
+                return jsonify({'success': False, 'error': 'Cannot find test_id in custom_tests.json'}), 404
+                
+            state_data = target_test.get('state_data', {})
+            state = create_state_from_json(state_data)
+            origin_seed = target_test.get('origin_seed', test_id)
+            seed_int = origin_seed
+            state.seed = origin_seed
+        else:
+            # Người dùng chọn Random Microsoft Seed (giữ nguyên logic cũ)
+            seed = data.get('seed', 1)
+            seed_int = int(seed)
+            state = FreeCellState(seed_int)
         
         games[game_id] = {
             'id': game_id,
             'state': state,
             'seed': seed_int,
+            'test_id': test_id,
             'created_at': time.time(),
             'move_count': 0
         }
@@ -163,7 +199,19 @@ def restart_game(game_id):
         return jsonify({'success': False, 'error': 'Game not found'}), 404
     
     game = games[game_id]
-    new_state = FreeCellState(game['seed'])
+    test_id = game.get('test_id')
+
+    if test_id:
+        test_cases = load_tests_config()
+        target_test = next((tc for tc in test_cases if tc.get('id') == test_id), None)
+        if not target_test:
+            return jsonify({'success': False, 'error': 'Custom test not found'}), 404
+
+        new_state = create_state_from_json(target_test.get('state_data', {}))
+        new_state.seed = target_test.get('origin_seed', game['seed'])
+    else:
+        new_state = FreeCellState(game['seed'])
+
     games[game_id]['state'] = new_state
     games[game_id]['move_count'] = 0
     

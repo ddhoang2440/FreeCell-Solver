@@ -1,304 +1,468 @@
 import heapq
 import time
-from typing import List, Tuple, Optional, Dict
-from backend.solvers.base_solver import BaseSolver
+from typing import Dict, List, Optional, Tuple
+
 from backend.game_state import FreeCellState
+from backend.solvers.base_solver import BaseSolver
 
 
 class UCSSolver(BaseSolver):
     """
-    Uniform Cost Search solver for FreeCell.
+    Uniform Cost Search cho FreeCell — phiên bản cuối.
 
-    Improvements over naive UCS:
-    1. Differential move costs — foundation moves are free (cost 0), parking
-       a card to a free cell is expensive (cost 5). This guides the frontier
-       toward cheaper / better paths without requiring a heuristic.
-    2. Move ordering — within the same cost bucket, moves are sorted by
-       quality so the heap pops the most promising state first.
-    3. Resource limits — configurable max_nodes and max_time stop the search
-       before exhausting RAM on hard boards.
-    4. SocketIO progress reporting — emits solver_progress events to the
-       frontend at regular intervals so the UI stays responsive.
+    Thiết kế cost function:
+    ───────────────────────
+    Cost CHỈ encode "độ tốn kém thực" của move — không encode
+    "state sau tốt/xấu hơn bao nhiêu". Lý do:
+
+        cost -= delta_quality  →  cost âm/thấp giả tạo →
+        UCS thấy path "rẻ" nhưng thực ra không dẫn đến goal →
+        phải explore hàng trăm nghìn nodes sai hướng.
+
+    Công thức: cost = BASE + penalty_cộng_thêm
+    Không có phép trừ nào dựa vào trạng thái state.
+
+    Cost range 1–4:
+        foundation move  = 1   (ưu tiên tuyệt đối)
+        normal cascade   = 2   (tiêu chuẩn)
+        to freecell      = 3   (tốn tài nguyên tạm)
+        to freecell khi tight = 4  (penalty khi gần hết slot)
+
+    foundation_to_* bị prune hoàn toàn vì:
+        - Cực hiếm khi cần trong FreeCell chuẩn
+        - Chỉ tạo nhánh vô ích, tăng branching factor
+
+    Các tối ưu state-space (không đổi thuật toán):
+        [1] Auto-move     : foundation moves an toàn apply ngay, không branch
+        [2] Canonical hash: sort free cells + normalize empty cascades
+        [3] Move pruning  : no-undo, empty-cascade dedup, prune foundation_to
     """
 
-    # ------------------------------------------------------------------ #
-    #  Bảng chi phí cơ sở theo loại nước đi                              #
-    # ------------------------------------------------------------------ #
-    # Chi phí này là giá trị nền trước khi điều chỉnh theo ngữ cảnh.
-    # Nước đưa bài lên foundation luôn miễn phí (ưu tiên tuyệt đối).
-    # Các nước còn lại sẽ được cộng/trừ thêm dựa vào delta chất lượng state.
     _BASE_COST: Dict[str, int] = {
-        'cascade_to_foundation':        0,   # Luôn có lợi — miễn phí
-        'freecell_to_foundation':       0,   # Luôn có lợi — miễn phí
-        'cascade_to_cascade_sequence':  2,   # Di nhóm — tiết kiệm tài nguyên
-        'freecell_to_cascade':          2,   # Giải phóng ô tạm — tốt
-        'cascade_to_cascade':           4,   # Di chuyển đơn — trung tính
-        'cascade_to_freecell':          6,   # Ngốn ô tạm — tốn kém
+        "cascade_to_foundation":        1,
+        "freecell_to_foundation":       1,
+        "freecell_to_cascade":          2,
+        "cascade_to_cascade":           2,
+        "cascade_to_cascade_sequence":  2,
+        "cascade_to_freecell":          3,
     }
 
-    # Thứ tự ưu tiên khi sắp xếp nước đi (giá trị nhỏ = thử trước)
     _MOVE_PRIORITY: Dict[str, int] = {
-        'cascade_to_foundation':        0,
-        'freecell_to_foundation':       0,
-        'cascade_to_cascade_sequence':  1,
-        'freecell_to_cascade':          2,
-        'cascade_to_cascade':           3,
-        'cascade_to_freecell':          4,
+        "cascade_to_foundation":        0,
+        "freecell_to_foundation":       0,
+        "freecell_to_cascade":          1,
+        "cascade_to_cascade_sequence":  2,
+        "cascade_to_cascade":           3,
+        "cascade_to_freecell":          4,
     }
 
     def __init__(self, initial_state: FreeCellState):
         super().__init__(initial_state)
         self.priority_queue: List = []
         self.cost_so_far: Dict[int, int] = {}
+        self.came_from: Dict[int, Tuple[Optional[int], Optional[object]]] = {}
 
-        # Progress-reporting bookkeeping (set by app.py after construction)
+        # Cache: python_hash(state) → (canonical_hash, empty_free_cells)
+        # Tính 1 lần, dùng lại nhiều lần trong expand
+        self._canon_cache: Dict[int, int] = {}
+        self._free_cell_cache: Dict[int, int] = {}
+
         self.socketio = None
-        self.game_id = None
+        self.game_id  = None
         self.start_time: float = 0.0
         self._last_progress_time: float = 0.0
         self._last_sent_nodes: int = 0
+        self._initial_auto_moves: List[Tuple] = []
 
     # ------------------------------------------------------------------ #
-    #  Cost & ordering helpers                                             #
+    #  Canonical hash — tái lập, cache để không tính lại                  #
     # ------------------------------------------------------------------ #
-    def _state_quality(self, state: 'FreeCellState') -> float:
+    def _canonical_hash(self, state: FreeCellState) -> int:
         """
-        Đo chất lượng tổng thể của một state — giá trị càng cao càng tốt.
+        Chuẩn hóa state để loại duplicate từ hoán vị:
+          - Free cells: sort theo string (None → '')
+          - Empty cascades: chỉ đếm số lượng, không phân biệt vị trí
+          - Non-empty cascades: sort theo nội dung
+          - Foundation: unique theo suit, không cần chuẩn hóa
 
-        Bốn thành phần:
-          [A] Tiến độ foundation  : mỗi lá lên foundation = +10 điểm
-          [B] Tài nguyên trống    : free cell trống = +3, cascade rỗng = +7
-          [C] Bài bị kẹt         : mỗi lá blocked = -4 điểm (phạt)
-          [D] Chuỗi có thứ tự     : mỗi lá liên tiếp đúng thứ tự ở cuối cột = +1
+        Cache theo python hash(state) để tránh tính lại.
         """
-        # [A] Tiến độ đưa bài lên foundation — quan trọng nhất
-        foundation_score = sum(len(p) for p in state.foundations.values()) * 10
+        py_hash = hash(state)
+        if py_hash in self._canon_cache:
+            return self._canon_cache[py_hash]
 
-        # [B] Tài nguyên trống — càng nhiều chỗ trống, càng linh hoạt
-        resource_score = (state.get_empty_free_cells() * 3 +
-                          state.get_empty_cascades() * 7)
+        fc_key = tuple(sorted(
+            (str(c) if c else '') for c in state.free_cells
+        ))
+        non_empty = sorted(
+            tuple(str(c) for c in col)
+            for col in state.cascades if col
+        )
+        empty_count = sum(1 for col in state.cascades if not col)
+        fd_key = tuple(
+            (str(suit), len(pile))
+            for suit, pile in sorted(state.foundations.items(),
+                                     key=lambda x: str(x[0]))
+        )
+        result = hash((fc_key, tuple(non_empty), empty_count, fd_key))
+        self._canon_cache[py_hash]    = result
+        # Cache luôn empty_free_cells vì _get_move_cost cần
+        self._free_cell_cache[py_hash] = state.get_empty_free_cells()
+        return result
 
-        # [C] Phạt bài bị kẹt — bài không thể di chuyển làm tắc nghẽn
-        blocked_penalty = state.get_blocked_cards_count() * 4
+    def _get_empty_free_cells(self, state: FreeCellState) -> int:
+        """Lấy từ cache, tránh gọi lại state.get_empty_free_cells()."""
+        py_hash = hash(state)
+        if py_hash not in self._free_cell_cache:
+            self._canonical_hash(state)   # tính cache
+        return self._free_cell_cache[py_hash]
 
-        # [D] Thưởng cho chuỗi đã sắp xếp đúng thứ tự ở cuối mỗi cột
-        sequence_bonus = 0
-        for cascade in state.cascades:
-            for i in range(len(cascade) - 1, 0, -1):
-                if cascade[i].can_place_on(cascade[i - 1]):
-                    sequence_bonus += 1
-                else:
-                    break
-
-        return foundation_score + resource_score - blocked_penalty + sequence_bonus
-
-    def _get_move_cost(self, move: Tuple,
-                       state_before: 'FreeCellState',
-                       state_after: 'FreeCellState') -> int:
+    # ------------------------------------------------------------------ #
+    #  [1] Auto-move                                                       #
+    # ------------------------------------------------------------------ #
+    def _apply_auto_moves(
+        self, state: FreeCellState, path_moves: List[Tuple]
+    ) -> Tuple[FreeCellState, List[Tuple]]:
         """
-        Tính chi phí thực tế của một nước đi dựa vào ngữ cảnh state.
-
-        Công thức:
-            edge_cost = base_cost - (improvement // 2)
-            trong đó improvement = quality(state_after) - quality(state_before)
-
-        - Nước cải thiện state nhiều → improvement lớn → edge_cost nhỏ (thưởng)
-        - Nước làm state xấu đi     → improvement âm  → edge_cost lớn (phạt)
-        - Foundation moves           → luôn trả về 0 (ưu tiên tuyệt đối)
-        - Non-foundation moves       → tối thiểu = 1 (đảm bảo g(n) tăng nghiêm ngặt)
+        Apply liên tiếp foundation moves an toàn — không tạo branch mới.
+        Gộp vào edge hiện tại, không tốn thêm node expand.
         """
-        # Foundation moves luôn miễn phí — ưu tiên tuyệt đối trong UCS
-        if move[0] in ('cascade_to_foundation', 'freecell_to_foundation'):
-            return 0
+        current = state
+        moves   = list(path_moves)
+        while True:
+            auto = self._find_safe_foundation_move(current)
+            if auto is None:
+                break
+            nxt = current.apply_move(auto)
+            if nxt is None:
+                break
+            moves.append(auto)
+            current = nxt
+        return current, moves
 
-        base = self._BASE_COST.get(move[0], 4)
+    def _find_safe_foundation_move(self, state: FreeCellState) -> Optional[Tuple]:
+        """
+        Lá X an toàn lên foundation khi mọi lá (X-1) màu ngược đã lên foundation.
+        Đảm bảo X không cần làm bàn đạp cho cascade move nào sau này.
+        """
+        fvals = {suit: len(pile) for suit, pile in state.foundations.items()}
 
-        # Tính delta chất lượng giữa state trước và sau khi thực hiện move
-        q_before = self._state_quality(state_before)
-        q_after  = self._state_quality(state_after)
-        improvement = q_after - q_before   # Dương = state tốt hơn
+        def safe(card) -> bool:
+            needed = card.rank.value - 1
+            if needed == 0:
+                return True
+            opp = [s for s in state.foundations if _suit_color(s) != _suit_color(card.suit)]
+            return all(fvals.get(s, 0) >= needed for s in opp)
 
-        # Điều chỉnh: improvement chia 2 để tránh thưởng/phạt quá mạnh
-        edge_cost = base - int(improvement // 2)
+        for i, card in enumerate(state.free_cells):
+            if card and fvals.get(card.suit, 0) == card.rank.value - 1 and safe(card):
+                return ('freecell_to_foundation', i)
 
-        # Đảm bảo min=1: g(n) luôn tăng theo độ sâu, không có zero-cost plateau
-        return max(1, edge_cost)
+        for idx, col in enumerate(state.cascades):
+            if not col:
+                continue
+            card = col[-1]
+            if fvals.get(card.suit, 0) == card.rank.value - 1 and safe(card):
+                return ('cascade_to_foundation', idx)
+
+        return None
+
+    # ------------------------------------------------------------------ #
+    #  Cost function — additive only, không dùng state delta              #
+    # ------------------------------------------------------------------ #
+    def _get_move_cost(self, move: Tuple, state_before: FreeCellState) -> int:
+        """
+        Cost chỉ encode độ tốn kém của move.
+        Không compare state_before vs state_after — tránh cost âm giả tạo.
+
+        Các penalty được cộng thêm:
+          - cascade_to_freecell: tốn slot tạm (base=3)
+          - cascade_to_freecell khi empty_free <= 1: khan hiếm tài nguyên (+1)
+          - move vào empty cascade: dùng tài nguyên mạnh (+1)
+        """
+        mt   = move[0]
+        cost = self._BASE_COST.get(mt, 2)
+
+        if mt == "cascade_to_freecell":
+            empty_free = self._get_empty_free_cells(state_before)
+            if empty_free <= 1:
+                cost += 1   # khan hiếm free cell → phạt thêm
+
+        if mt in ("cascade_to_cascade", "freecell_to_cascade",
+                  "cascade_to_cascade_sequence"):
+            dest_idx = move[2] if len(move) > 2 else None
+            if isinstance(dest_idx, int) and not state_before.cascades[dest_idx]:
+                cost += 1   # dùng empty cascade → tài nguyên mạnh
+
+        return cost   # guaranteed >= 1 vì _BASE_COST min = 1
+
+    # ------------------------------------------------------------------ #
+    #  [3] Move pruning                                                    #
+    # ------------------------------------------------------------------ #
+    def _prune_moves(
+        self,
+        moves: List[Tuple],
+        state: FreeCellState,
+        last_move: Optional[Tuple],
+    ) -> List[Tuple]:
+        """
+        Rule 1: Không hoàn tác nước vừa đi (no-undo).
+        Rule 2: Nhiều empty cascades tương đương → chỉ thử 1 đại diện.
+        Rule 3: Không di chuyển từ cột rỗng.
+        Rule 4: Bỏ hoàn toàn foundation_to_* — cực hiếm cần, chỉ tạo nhánh thừa.
+        """
+        empty_cascades  = {i for i, col in enumerate(state.cascades) if not col}
+        used_empty_dest: set = set()
+        result = []
+
+        for move in moves:
+            mt = move[0]
+
+            # Rule 4: bỏ hoàn toàn foundation_to_*
+            if mt.startswith("foundation_to"):
+                continue
+
+            # Rule 3: không di chuyển từ cột rỗng
+            if mt in ("cascade_to_cascade", "cascade_to_cascade_sequence"):
+                if move[1] in empty_cascades:
+                    continue
+
+            # Rule 2: empty cascade tương đương → chỉ 1 đại diện
+            if mt in ("cascade_to_cascade", "freecell_to_cascade",
+                      "cascade_to_cascade_sequence"):
+                dest = move[2] if len(move) > 2 else None
+                if isinstance(dest, int) and dest in empty_cascades:
+                    src = move[1]
+                    if src in used_empty_dest:
+                        continue
+                    used_empty_dest.add(src)
+
+            # Rule 1: no-undo
+            if last_move is not None and _is_reverse_move(move, last_move):
+                continue
+
+            result.append(move)
+
+        return result
 
     def _sort_moves(self, moves: List[Tuple], state: FreeCellState) -> List[Tuple]:
-        """Sort moves by quality so better moves are pushed with lower tie-break counters."""
-        def _key(move: Tuple) -> int:
-            base = self._MOVE_PRIORITY.get(move[0], 5)
-            # Extra reward: moving to non-empty cascade (avoids wasting empty slots)
-            if move[0] in ('cascade_to_cascade', 'freecell_to_cascade',
-                           'cascade_to_cascade_sequence'):
-                if len(move) >= 3:
-                    dest_idx = move[2]
-                    if state.cascades[dest_idx]:   # non-empty destination
-                        return base - 1            # slight preference
-            return base
-
+        """Tie-breaking khi cost bằng nhau — không ảnh hưởng tính UCS."""
+        def _key(m: Tuple) -> Tuple[int, int]:
+            base = self._MOVE_PRIORITY.get(m[0], 99)
+            bonus = 0
+            if m[0] in ("cascade_to_cascade", "freecell_to_cascade",
+                        "cascade_to_cascade_sequence") and len(m) >= 3:
+                if isinstance(m[2], int) and state.cascades[m[2]]:
+                    bonus = -1   # ưu tiên nhẹ move vào cột không rỗng
+            return (base, bonus)
         return sorted(moves, key=_key)
+
+    # ------------------------------------------------------------------ #
+    #  Path reconstruction                                                 #
+    # ------------------------------------------------------------------ #
+    def _reconstruct_path(self, goal_hash: int) -> List[Tuple]:
+        """Truy ngược came_from. Mỗi entry = [move_chính] + auto-moves."""
+        segments, current = [], goal_hash
+        while True:
+            parent_hash, seg = self.came_from[current]
+            if seg is None:
+                break
+            segments.append(seg)
+            current = parent_hash
+        segments.reverse()
+        return [m for seg in segments for m in seg]
+
+    def _get_depth(self, state_hash: int) -> int:
+        depth, cur = 0, state_hash
+        while True:
+            parent, mv = self.came_from.get(cur, (None, None))
+            if mv is None:
+                return depth
+            depth += 1
+            cur = parent
 
     # ------------------------------------------------------------------ #
     #  SocketIO progress                                                   #
     # ------------------------------------------------------------------ #
-    def _send_progress(self, current_state: FreeCellState, current_path: List):
+    def _send_progress(self, state: FreeCellState, depth: int):
         if not self.socketio:
             return
-
         now = time.time()
-        time_diff = now - self._last_progress_time
-        node_diff = self.expanded_nodes - self._last_sent_nodes
-
-        # Throttle: emit at most once every 2 s OR every 10 000 nodes
-        if time_diff < 2.0 and node_diff < 10_000:
+        if now - self._last_progress_time < 2.0 \
+                and self.expanded_nodes - self._last_sent_nodes < 10_000:
             return
 
-        foundation_cards = sum(len(p) for p in current_state.foundations.values())
-        free_cells_used = sum(1 for c in current_state.free_cells if c is not None)
-        elapsed = now - self.start_time if self.start_time else 1.0
-        rate = self.expanded_nodes / elapsed if elapsed > 0 else 0.0
-        progress = min(99.0, (foundation_cards / 52) * 100)
+        fc_cards  = sum(len(p) for p in state.foundations.values())
+        fc_used   = sum(1 for c in state.free_cells if c is not None)
+        elapsed   = now - self.start_time or 1.0
+        rate      = self.expanded_nodes / elapsed
 
         try:
-            self.socketio.emit('solver_progress', {
-                'game_id': self.game_id,
-                'solver': 'UCS',
-                'progress': round(progress, 1),
-                'nodes_explored': self.expanded_nodes,
-                'current_depth': len(current_path),
-                'foundation_cards': foundation_cards,
-                'free_cells_used': free_cells_used,
-                'exploration_rate': round(rate, 1),
-                'queue_size': len(self.priority_queue),
+            self.socketio.emit("solver_progress", {
+                "game_id":          self.game_id,
+                "solver":           "UCS",
+                "progress":         round(min(99.0, fc_cards / 52 * 100), 1),
+                "nodes_explored":   self.expanded_nodes,
+                "current_depth":    depth,
+                "foundation_cards": fc_cards,
+                "free_cells_used":  fc_used,
+                "exploration_rate": round(rate, 1),
+                "queue_size":       len(self.priority_queue),
             })
         except Exception:
             pass
 
         self._last_progress_time = now
-        self._last_sent_nodes = self.expanded_nodes
+        self._last_sent_nodes    = self.expanded_nodes
 
     # ------------------------------------------------------------------ #
     #  Main search                                                         #
     # ------------------------------------------------------------------ #
-    def solve(self, max_nodes: float = float('inf'), max_time: int = 86400) -> Optional[List[Tuple]]:
+    def solve(self, max_nodes: float = float("inf"),
+              max_time: int = 86400) -> Optional[List[Tuple]]:
         """
-        UCS search for a FreeCell solution.
-
-        Args:
-            max_nodes: Abort after expanding this many nodes (default: unlimited).
-            max_time:  Abort after this many seconds (default: 24h — effectively unlimited).
-
-        Returns:
-            List of moves leading to a solved board, or None if no solution exists.
+        UCS chuẩn với cost additive-only (range 1–4) và các tối ưu:
+          [1] Auto-move foundation an toàn
+          [2] Canonical hash — loại duplicate từ hoán vị
+          [3] Move pruning — no-undo, empty dedup, bỏ foundation_to
         """
-        # --- Reset state ---------------------------------------------------
         self.priority_queue.clear()
         self.cost_so_far.clear()
         self.visited.clear()
-        self.expanded_nodes = 0
-        self.start_time = time.time()
+        self.came_from.clear()
+        self._canon_cache.clear()
+        self._free_cell_cache.clear()
+        self.expanded_nodes      = 0
+        self.start_time          = time.time()
         self._last_progress_time = self.start_time
-        self._last_sent_nodes = 0
+        self._last_sent_nodes    = 0
 
-        initial_hash = hash(self.initial_state)
-        self.cost_so_far[initial_hash] = 0
+        # [1] Auto-move từ initial state
+        initial_state, self._initial_auto_moves = self._apply_auto_moves(
+            self.initial_state, []
+        )
+        if initial_state.is_goal():
+            self.solution = self._initial_auto_moves
+            return self._initial_auto_moves
 
-        # Heap entry: (cumulative_cost, tie_break_counter, state, path)
+        init_hash = self._canonical_hash(initial_state)
+        self.cost_so_far[init_hash] = 0
+        self.came_from[init_hash]   = (None, None)
+
+        # Heap: (g_cost, move_priority_tiebreak, counter, state, last_move)
         counter = 0
-        heapq.heappush(self.priority_queue, (0, counter, self.initial_state, []))
+        heapq.heappush(self.priority_queue, (0, 0, counter, initial_state, None))
 
-        print(f"[UCS] Starting search — no node/time limits (will run until solution found)")
+        print("[UCS] Starting — additive cost 1–4, canonical hash, auto-move, pruning")
 
-        # --- Search loop ---------------------------------------------------
         while self.priority_queue and self.expanded_nodes < max_nodes:
-            # Check wall-clock time limit
             now = time.time()
             if now - self.start_time > max_time:
-                print(f"[UCS] Time limit reached after {self.expanded_nodes:,} nodes")
+                print(f"[UCS] Time limit — {self.expanded_nodes:,} nodes")
                 return None
 
-            current_cost, _, current_state, path = heapq.heappop(self.priority_queue)
-            current_hash = hash(current_state)
+            current_cost, _, _, current_state, last_move = heapq.heappop(
+                self.priority_queue
+            )
+            current_hash = self._canonical_hash(current_state)
 
-            # Stale entry — a cheaper path was already found
-            if current_cost > self.cost_so_far.get(current_hash, float('inf')):
+            # Lazy deletion: stale entry
+            if current_cost > self.cost_so_far.get(current_hash, float("inf")):
                 continue
 
-            # Already fully explored via a shorter/equal path
+            # Visited check khi POP — đúng lý thuyết UCS
             if current_hash in self.visited:
                 continue
-
             self.visited.add(current_hash)
             self.expanded_nodes += 1
 
-            # --- Periodic logging & progress --------------------------------
             if self.expanded_nodes % 5_000 == 0:
+                depth   = self._get_depth(current_hash)
                 elapsed = time.time() - self.start_time
-                rate = self.expanded_nodes / elapsed if elapsed > 0 else 0
+                rate    = self.expanded_nodes / elapsed if elapsed > 0 else 0
                 print(
                     f"[UCS] Nodes: {self.expanded_nodes:,}, "
                     f"Rate: {rate:.0f} n/s, "
                     f"Queue: {len(self.priority_queue):,}, "
-                    f"Cost: {current_cost}, "
-                    f"Depth: {len(path)}"
+                    f"Cost: {current_cost}, Depth: {depth}"
                 )
-                self._send_progress(current_state, path)
+                self._send_progress(current_state, depth)
 
-            # --- Goal check -------------------------------------------------
             if current_state.is_goal():
                 elapsed = time.time() - self.start_time
+                path    = self._initial_auto_moves + self._reconstruct_path(current_hash)
                 print(
-                    f"[UCS] Solution found! "
-                    f"Nodes: {self.expanded_nodes:,}, "
-                    f"Time: {elapsed:.2f}s, "
-                    f"Path length: {len(path)}, "
-                    f"Total cost: {current_cost}"
+                    f"[UCS] Solution found! Nodes: {self.expanded_nodes:,}, "
+                    f"Time: {elapsed:.2f}s, Moves: {len(path)}, Cost: {current_cost}"
                 )
                 self.solution = path
-
                 if self.socketio:
                     try:
-                        self.socketio.emit('solver_progress', {
-                            'game_id': self.game_id,
-                            'solver': 'UCS',
-                            'progress': 100,
-                            'nodes_explored': self.expanded_nodes,
-                            'time_taken': elapsed,
-                            'solution_length': len(path),
+                        self.socketio.emit("solver_progress", {
+                            "game_id":         self.game_id,
+                            "solver":          "UCS",
+                            "progress":        100,
+                            "nodes_explored":  self.expanded_nodes,
+                            "time_taken":      elapsed,
+                            "solution_length": len(path),
                         })
                     except Exception:
                         pass
-
                 return path
 
-            # --- Expand node ------------------------------------------------
+            # Expand
             moves = current_state.get_all_moves()
             moves = self._sort_moves(moves, current_state)
+            moves = self._prune_moves(moves, current_state, last_move)
 
-            for move in moves:
+            for priority_idx, move in enumerate(moves):
                 new_state = current_state.apply_move(move)
                 if new_state is None:
                     continue
 
-                new_hash = hash(new_state)
+                # [1] Auto-move: gộp foundation moves bắt buộc vào cùng edge
+                new_state, auto_moves_after = self._apply_auto_moves(
+                    new_state, [move]
+                )
 
-                # Skip already-visited states
+                # [2] Canonical hash
+                new_hash = self._canonical_hash(new_state)
                 if new_hash in self.visited:
                     continue
 
-                # Tính edge weight theo ngữ cảnh: trước và sau khi apply move
-                new_cost = current_cost + self._get_move_cost(move, current_state, new_state)
+                edge_cost = self._get_move_cost(move, current_state)
+                new_cost  = current_cost + edge_cost
 
-                # Only push if this is a strictly better (cheaper) path
-                if new_cost < self.cost_so_far.get(new_hash, float('inf')):
+                if new_cost < self.cost_so_far.get(new_hash, float("inf")):
                     self.cost_so_far[new_hash] = new_cost
+                    self.came_from[new_hash]   = (current_hash, auto_moves_after)
                     counter += 1
-                    new_path = path + [move]
                     heapq.heappush(
                         self.priority_queue,
-                        (new_cost, counter, new_state, new_path)
+                        (new_cost, priority_idx, counter, new_state, move)
                     )
 
-        print(f"[UCS] Search exhausted — expanded {self.expanded_nodes:,} nodes, no solution found")
+        print(f"[UCS] Exhausted — {self.expanded_nodes:,} nodes, no solution")
         return None
+
+
+# ------------------------------------------------------------------ #
+#  Module-level helpers                                               #
+# ------------------------------------------------------------------ #
+def _suit_color(suit) -> str:
+    name = suit.name.lower() if hasattr(suit, "name") else str(suit).lower()
+    return "red" if name in ("hearts", "diamonds") else "black"
+
+
+def _is_reverse_move(move: Tuple, last_move: Tuple) -> bool:
+    """Kiểm tra move có hoàn tác trực tiếp last_move không."""
+    mt, lmt = move[0], last_move[0]
+    pairs = {
+        ("cascade_to_freecell",  "freecell_to_cascade"),
+        ("freecell_to_cascade",  "cascade_to_freecell"),
+        ("cascade_to_cascade",   "cascade_to_cascade"),
+    }
+    if (mt, lmt) not in pairs:
+        return False
+    return (len(move) >= 3 and len(last_move) >= 3
+            and move[1] == last_move[2] and move[2] == last_move[1])

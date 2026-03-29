@@ -153,3 +153,39 @@
     transform: rotate(360deg);
   }
 }
+
+.game-mode-toggles {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 10px 15px;
+  border: 2px solid #1a4d1a;
+  background: white;
+  color: #1a4d1a;
+  font-weight: bold;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.mode-btn:hover {
+  background: #f0f0f0;
+}
+
+.mode-btn.active {
+  background: #1a4d1a;
+  color: #ffd700;
+  border-color: #1a4d1a;
+}
+
+#custom-test-select {
+  cursor: pointer;
+  appearance: checkbox; /* for default styling */
+  background-color: white;
+}
