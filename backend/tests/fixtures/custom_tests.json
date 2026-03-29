@@ -26,6 +26,56 @@
       }
     },
     {
+      "id": "02",
+      "origin_seed": 25904,
+      "category": "super-easy",
+      "description": "3 moves to win.",
+      "state_data": {
+        "cascades": [
+          ["KS", "QH", "JH", "10D"],
+          ["KH"],
+          ["10S", "9C", "10C", "JC", "10H"],
+          ["JH", "KC", "QD"],
+          ["QC"],
+          [],
+          ["KD", "QS", "JD"],
+          []
+        ],
+        "free_cells": [null, null, null, null],
+        "foundations": {
+          "SPADES": 9,
+          "HEARTS": 9,
+          "CLUBS": 8,
+          "DIAMONDS": 9
+        }
+      }
+    },
+    {
+      "id": "03",
+      "origin_seed": 11987,
+      "category": "super-easy",
+      "description": "3 moves to win.",
+      "state_data": {
+        "cascades": [
+          ["10C"],
+          ["JD", "5D", "10D"],
+          ["8S"],
+          ["7H"],
+          ["9S", "8D", "7S"],
+          ["KC", "KH", "9H", "QC", "KS", "QH", "JS"],
+          ["QS", "JH", "10S", "9D", "8C", "7D", "6C"],
+          ["KD", "QD", "JC", "10H", "9C", "8H", "7C", "6D"]
+        ],
+        "free_cells": [null,null,null,null],
+        "foundations": {
+          "SPADES": 6,
+          "HEARTS": 6,
+          "CLUBS": 5,
+          "DIAMONDS": 4
+        }
+      }
+    },
+    {
       "id": "01",
       "origin_seed": 25904,
       "category": "easy",
@@ -97,6 +147,32 @@
           "HEARTS": 6,
           "CLUBS": 5,
           "DIAMONDS": 4
+        }
+      }
+    },
+
+    {
+      "id": "-01",
+      "origin_seed": 11982,
+      "category": "Unbeatable",
+      "description": "Unsolvable",
+      "state_data": {
+        "cascades": [
+          ["AH", "3D", "KD", "JC", "6C", "JD", "KC"],
+          ["AS", "3H", "6H", "5D", "2C", "7D", "8D"],
+          ["4H", "QS", "5S", "5C", "10H", "8H", "2S"],
+          ["AC", "QC", "4D", "8C", "QH", "9C", "3S"],
+          ["2D", "8S", "9H", "9D", "6D", "2H"],
+          ["6S", "7H", "JH", "10D", "10C", "QD"],
+          ["10S", "AD", "9S", "KH", "4S", "4C"],
+          ["JS", "KS", "3C", "7C", "7S", "5H"]
+        ],
+        "free_cells": [null, null, null, null],
+        "foundations": {
+          "SPADES": 0,
+          "HEARTS": 0,
+          "CLUBS": 0,
+          "DIAMONDS": 0
         }
       }
     }
