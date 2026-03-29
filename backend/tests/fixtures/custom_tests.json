@@ -2,6 +2,31 @@
   "test_cases": [
     {
       "id": "01",
+      "origin_seed": 11987,
+      "category": "super-easy",
+      "description": "3 moves to win.",
+      "state_data": {
+        "cascades": [
+          ["10C"],
+          ["JD", "5D", "10D"],
+          ["8S"],
+          ["7H"],
+          ["9S", "8D", "7S"],
+          ["KC", "KH", "9H", "QC", "KS", "QH", "JS"],
+          ["QS", "JH", "10S", "9D", "8C", "7D", "6C"],
+          ["KD", "QD", "JC", "10H", "9C", "8H", "7C", "6D"]
+        ],
+        "free_cells": [null,null,null,null],
+        "foundations": {
+          "SPADES": 6,
+          "HEARTS": 6,
+          "CLUBS": 5,
+          "DIAMONDS": 4
+        }
+      }
+    },
+    {
+      "id": "01",
       "origin_seed": 25904,
       "category": "easy",
       "description": "10 moves to win.",
@@ -44,9 +69,34 @@
         "free_cells": [null,null,null,null],
         "foundations": {
           "SPADES": 7,
-          "HEARTS": 5,
+          "HEARTS": 6,
           "CLUBS": 4,
           "DIAMONDS": 5
+        }
+      }
+    },
+    {
+      "id": "03",
+      "origin_seed": 11987,
+      "category": "easy",
+      "description": "5 moves to win.",
+      "state_data": {
+        "cascades": [
+          [],
+          ["JD", "5D", "10D", "10C", "6C"],
+          ["8S"],
+          ["7H"],
+          ["9S", "8D", "7S"],
+          ["KC", "KH", "9H", "QC", "KS", "QH", "JS"],
+          ["QS", "JH", "10S", "9D", "8C", "7D"],
+          ["KD", "QD", "JC", "10H", "9C", "8H", "7C", "6D"]
+        ],
+        "free_cells": [null,null,null,null],
+        "foundations": {
+          "SPADES": 6,
+          "HEARTS": 6,
+          "CLUBS": 5,
+          "DIAMONDS": 4
         }
       }
     }
