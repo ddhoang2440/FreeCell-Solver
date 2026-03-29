@@ -2,18 +2,19 @@
   "test_cases": [
     {
       "id": "01",
+      "origin_seed": 25904,
       "category": "easy",
       "description": "10 moves to win.",
       "state_data": {
         "cascades": [
           [],
+          ["KH", "7C", "9D", "8S", "QC"],
           ["10S", "9C", "10C", "JC", "10H", "9S"],
           ["JH", "KC", "QD"],
           ["6H", "KS", "7S", "8H"],
           ["8C", "8D", "9H", "QH", "JS", "10D"],
           ["KD", "QS", "JD"],
-          ["7H"],
-          ["KH", "7C", "9D", "8S", "QC"]
+          ["7H"]
         ],
         "free_cells": [null, null, null, null],
         "foundations": {

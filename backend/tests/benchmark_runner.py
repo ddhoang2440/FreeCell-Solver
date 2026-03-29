@@ -19,52 +19,7 @@ from backend.solvers.dfs_solver import DFSSolver
 from backend.solvers.ucs_solver import UCSSolver
 from backend.solvers.astar_solver import AStarSolver
 
-def parse_card(s):
-    if not s:
-        return None
-    suit_char = s[-1].upper()
-    rank_str = s[:-1].upper()
-    
-    suit_map = {'S': Suit.SPADES, 'H': Suit.HEARTS, 'C': Suit.CLUBS, 'D': Suit.DIAMONDS}
-    rank_map = {'A': Rank.ACE, '2': Rank.TWO, '3': Rank.THREE, '4': Rank.FOUR, 
-                '5': Rank.FIVE, '6': Rank.SIX, '7': Rank.SEVEN, '8': Rank.EIGHT, 
-                '9': Rank.NINE, '10': Rank.TEN, 'J': Rank.JACK, 'Q': Rank.QUEEN, 
-                'K': Rank.KING}
-                
-    if suit_char not in suit_map or rank_str not in rank_map:
-        raise ValueError(f"Khong the parse card: {s}")
-        
-    return Card(suit_map[suit_char], rank_map[rank_str])
-
-def create_state_from_json(state_data):
-    state = FreeCellState(seed=1) # Seed giả vì chúng ta sẽ overwrite dưới đây
-    state.cascades = [[] for _ in range(8)]
-    state.free_cells = [None] * 4
-    state.foundations = {Suit.SPADES: [], Suit.HEARTS: [], Suit.CLUBS: [], Suit.DIAMONDS: []}
-    
-    # 1. Cascades
-    for i, cascade in enumerate(state_data.get('cascades', [])):
-        if i >= 8: break
-        for card_str in cascade:
-            state.cascades[i].append(parse_card(card_str))
-            
-    # 2. Free cells
-    free_cells_data = state_data.get('free_cells', [])
-    for i in range(4):
-        if i < len(free_cells_data) and free_cells_data[i]:
-            state.free_cells[i] = parse_card(free_cells_data[i])
-            
-    # 3. Foundations
-    founds_data = state_data.get('foundations', {})
-    suit_name_map = {'SPADES': Suit.SPADES, 'HEARTS': Suit.HEARTS, 'CLUBS': Suit.CLUBS, 'DIAMONDS': Suit.DIAMONDS}
-    for suit_name, highest_rank in founds_data.items():
-        suit = suit_name_map.get(suit_name.upper())
-        if suit and highest_rank > 0:
-            for val in range(1, highest_rank + 1):
-                state.foundations[suit].append(Card(suit, Rank(val)))
-                
-    state._invalidate_cache()
-    return state
+from backend.test_parser import create_state_from_json, load_tests_config
 
 def run_solver_worker(solver_class, state, queue):
     """Worker chạy trong process riêng biệt để có thể force kill nếu timeout"""
@@ -76,16 +31,7 @@ def run_solver_worker(solver_class, state, queue):
         queue.put((False, str(e)))
 
 def run_benchmark(timeout=60):
-    fixtures_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'custom_tests.json')
-    results_dir = os.path.join(os.path.dirname(__file__), 'results')
-    
-    if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
-        
-    with open(fixtures_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-        
-    test_cases = data.get('test_cases', [])
+    test_cases = load_tests_config()
     if not test_cases:
         print("Khong tim thay test case nao trong file.")
         return
@@ -97,6 +43,11 @@ def run_benchmark(timeout=60):
         'A*': AStarSolver
     }
     
+    results_dir = os.path.join(os.path.dirname(__file__), 'results')
+    
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+        
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     csv_file_path = os.path.join(results_dir, f'summary_{timestamp}.csv')
     json_file_path = os.path.join(results_dir, f'run_{timestamp}.json')
