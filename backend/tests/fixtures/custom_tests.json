@@ -1,0 +1,28 @@
+{
+  "test_cases": [
+    {
+      "id": "test01_10_move_to_win",
+      "category": "easy",
+      "description": "State còn 10 bước nữa để thắng",
+      "state_data": {
+        "cascades": [
+          [],
+          ["10S", "9C", "10C", "JC", "10H", "9S"],
+          ["JH", "KC", "QD"],
+          ["6H", "KS", "7S", "8H"],
+          ["8C", "8D", "9H", "QH", "JS", "10D"],
+          ["KD", "QS", "JD"],
+          ["7H"],
+          ["KH", "7C", "9D", "8S", "QC"]
+        ],
+        "free_cells": [null, null, null, null],
+        "foundations": {
+          "SPADES": 6,
+          "HEARTS": 5,
+          "CLUBS": 6,
+          "DIAMONDS": 7
+        }
+      }
+    }
+  ]
+}
