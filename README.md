@@ -1,3 +1,8 @@
-Step 1: pip install -r requirements.txt
-Step 2: python main.py
-Step 3: profit :D
+folder frontend 
+step 1:npm i
+step 2: npm run dev
+folder backend
+step 3: pip install requirements.txt
+out ra Solitaired
+step 4: python -m backend.app
+step 5: profit
