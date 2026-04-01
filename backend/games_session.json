@@ -1,0 +1,3373 @@
+{
+  "29cfd315-e4a7-4864-a71d-2ca4e8c396de": {
+    "state": {
+      "cascades": [
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 10,
+            "display": "10♣"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 8,
+            "display": "8♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 7,
+            "display": "7♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 6,
+            "display": "6♣"
+          }
+        ],
+        [
+          {
+            "suit": "HEARTS",
+            "rank": 12,
+            "display": "Q♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 11,
+            "display": "J♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 10,
+            "display": "10♦"
+          }
+        ],
+        [
+          {
+            "suit": "HEARTS",
+            "rank": 7,
+            "display": "7♥"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 9,
+            "display": "9♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 8,
+            "display": "8♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 7,
+            "display": "7♠"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 13,
+            "display": "K♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 13,
+            "display": "K♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 9,
+            "display": "9♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 12,
+            "display": "Q♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 13,
+            "display": "K♠"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 12,
+            "display": "Q♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 11,
+            "display": "J♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 10,
+            "display": "10♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 9,
+            "display": "9♦"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 13,
+            "display": "K♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 12,
+            "display": "Q♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 11,
+            "display": "J♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 10,
+            "display": "10♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 9,
+            "display": "9♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 8,
+            "display": "8♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 7,
+            "display": "7♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 6,
+            "display": "6♦"
+          }
+        ]
+      ],
+      "free_cells": [
+        null,
+        {
+          "suit": "DIAMONDS",
+          "rank": 5,
+          "display": "5♦"
+        },
+        {
+          "suit": "DIAMONDS",
+          "rank": 11,
+          "display": "J♦"
+        },
+        {
+          "suit": "SPADES",
+          "rank": 8,
+          "display": "8♠"
+        }
+      ],
+      "foundations": {
+        "SPADES": [
+          {
+            "suit": "SPADES",
+            "rank": 1,
+            "display": "A♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 2,
+            "display": "2♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 3,
+            "display": "3♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 4,
+            "display": "4♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 5,
+            "display": "5♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 6,
+            "display": "6♠"
+          }
+        ],
+        "HEARTS": [
+          {
+            "suit": "HEARTS",
+            "rank": 1,
+            "display": "A♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 2,
+            "display": "2♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 3,
+            "display": "3♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 4,
+            "display": "4♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 5,
+            "display": "5♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 6,
+            "display": "6♥"
+          }
+        ],
+        "CLUBS": [
+          {
+            "suit": "CLUBS",
+            "rank": 1,
+            "display": "A♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 2,
+            "display": "2♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 3,
+            "display": "3♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 4,
+            "display": "4♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 5,
+            "display": "5♣"
+          }
+        ],
+        "DIAMONDS": [
+          {
+            "suit": "DIAMONDS",
+            "rank": 1,
+            "display": "A♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 2,
+            "display": "2♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 3,
+            "display": "3♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 4,
+            "display": "4♦"
+          }
+        ]
+      },
+      "move_history": [
+        [
+          "cascade_to_cascade",
+          1,
+          5,
+          {
+            "suit": "DIAMONDS",
+            "rank": 10
+          }
+        ],
+        [
+          "cascade_to_freecell",
+          1,
+          1,
+          {
+            "suit": "DIAMONDS",
+            "rank": 5
+          }
+        ],
+        [
+          "cascade_to_freecell",
+          1,
+          2,
+          {
+            "suit": "DIAMONDS",
+            "rank": 11
+          }
+        ],
+        [
+          "cascade_to_freecell",
+          2,
+          3,
+          {
+            "suit": "SPADES",
+            "rank": 8
+          }
+        ],
+        [
+          "cascade_to_cascade_sequence",
+          5,
+          2,
+          3,
+          [
+            {
+              "suit": "HEARTS",
+              "rank": 12
+            },
+            {
+              "suit": "SPADES",
+              "rank": 11
+            },
+            {
+              "suit": "DIAMONDS",
+              "rank": 10
+            }
+          ]
+        ],
+        [
+          "cascade_to_cascade_sequence",
+          2,
+          1,
+          2,
+          [
+            {
+              "suit": "SPADES",
+              "rank": 11
+            },
+            {
+              "suit": "DIAMONDS",
+              "rank": 10
+            }
+          ]
+        ],
+        [
+          "cascade_to_cascade_sequence",
+          1,
+          2,
+          2,
+          [
+            {
+              "suit": "SPADES",
+              "rank": 11
+            },
+            {
+              "suit": "DIAMONDS",
+              "rank": 10
+            }
+          ]
+        ],
+        [
+          "cascade_to_cascade_sequence",
+          6,
+          1,
+          3,
+          [
+            {
+              "suit": "CLUBS",
+              "rank": 8
+            },
+            {
+              "suit": "DIAMONDS",
+              "rank": 7
+            },
+            {
+              "suit": "CLUBS",
+              "rank": 6
+            }
+          ]
+        ]
+      ],
+      "max_sequence_length": 2,
+      "max_sequence_to_empty": 2,
+      "empty_free_cells": 1,
+      "empty_cascades": 0,
+      "seed": 11987
+    },
+    "move_count": 8,
+    "start_time": 1774980521.5268834,
+    "seed": 1,
+    "test_id": null
+  },
+  "f8a2804c-eb24-48c9-bc4a-85d548ef91fc": {
+    "state": {
+      "cascades": [
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 10,
+            "display": "10♣"
+          }
+        ],
+        [],
+        [],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 8,
+            "display": "8♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 7,
+            "display": "7♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 6,
+            "display": "6♣"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 9,
+            "display": "9♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 8,
+            "display": "8♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 7,
+            "display": "7♠"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 13,
+            "display": "K♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 13,
+            "display": "K♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 9,
+            "display": "9♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 12,
+            "display": "Q♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 13,
+            "display": "K♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 12,
+            "display": "Q♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 11,
+            "display": "J♠"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 12,
+            "display": "Q♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 11,
+            "display": "J♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 10,
+            "display": "10♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 9,
+            "display": "9♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 8,
+            "display": "8♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 7,
+            "display": "7♦"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 13,
+            "display": "K♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 12,
+            "display": "Q♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 11,
+            "display": "J♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 10,
+            "display": "10♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 9,
+            "display": "9♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 8,
+            "display": "8♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 7,
+            "display": "7♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 6,
+            "display": "6♦"
+          }
+        ]
+      ],
+      "free_cells": [
+        null,
+        {
+          "suit": "DIAMONDS",
+          "rank": 10,
+          "display": "10♦"
+        },
+        {
+          "suit": "DIAMONDS",
+          "rank": 5,
+          "display": "5♦"
+        },
+        {
+          "suit": "DIAMONDS",
+          "rank": 11,
+          "display": "J♦"
+        }
+      ],
+      "foundations": {
+        "SPADES": [
+          {
+            "suit": "SPADES",
+            "rank": 1,
+            "display": "A♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 2,
+            "display": "2♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 3,
+            "display": "3♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 4,
+            "display": "4♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 5,
+            "display": "5♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 6,
+            "display": "6♠"
+          }
+        ],
+        "HEARTS": [
+          {
+            "suit": "HEARTS",
+            "rank": 1,
+            "display": "A♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 2,
+            "display": "2♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 3,
+            "display": "3♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 4,
+            "display": "4♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 5,
+            "display": "5♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 6,
+            "display": "6♥"
+          }
+        ],
+        "CLUBS": [
+          {
+            "suit": "CLUBS",
+            "rank": 1,
+            "display": "A♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 2,
+            "display": "2♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 3,
+            "display": "3♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 4,
+            "display": "4♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 5,
+            "display": "5♣"
+          }
+        ],
+        "DIAMONDS": [
+          {
+            "suit": "DIAMONDS",
+            "rank": 1,
+            "display": "A♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 2,
+            "display": "2♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 3,
+            "display": "3♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 4,
+            "display": "4♦"
+          }
+        ]
+      },
+      "move_history": [
+        [
+          "cascade_to_foundation",
+          4,
+          {
+            "suit": "SPADES",
+            "rank": 7
+          }
+        ],
+        [
+          "foundation_to_cascade",
+          "SPADES",
+          4,
+          {
+            "suit": "SPADES",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_cascade",
+          3,
+          2,
+          {
+            "suit": "HEARTS",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_freecell",
+          1,
+          1,
+          {
+            "suit": "DIAMONDS",
+            "rank": 10
+          }
+        ],
+        [
+          "cascade_to_freecell",
+          1,
+          2,
+          {
+            "suit": "DIAMONDS",
+            "rank": 5
+          }
+        ],
+        [
+          "cascade_to_freecell",
+          1,
+          3,
+          {
+            "suit": "DIAMONDS",
+            "rank": 11
+          }
+        ],
+        [
+          "cascade_to_cascade_sequence",
+          2,
+          3,
+          2,
+          [
+            {
+              "suit": "SPADES",
+              "rank": 8
+            },
+            {
+              "suit": "HEARTS",
+              "rank": 7
+            }
+          ]
+        ],
+        [
+          "cascade_to_cascade",
+          6,
+          3,
+          {
+            "suit": "CLUBS",
+            "rank": 6
+          }
+        ]
+      ],
+      "max_sequence_length": 8,
+      "max_sequence_to_empty": 4,
+      "empty_free_cells": 1,
+      "empty_cascades": 2,
+      "seed": 11987
+    },
+    "move_count": 8,
+    "start_time": 1774980671.6649919,
+    "seed": 1,
+    "test_id": null
+  },
+  "940100c8-6472-4820-ac76-42b650ca6b77": {
+    "state": {
+      "cascades": [
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 10,
+            "display": "10♣"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 11,
+            "display": "J♦"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 8,
+            "display": "8♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 7,
+            "display": "7♥"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 6,
+            "display": "6♣"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 9,
+            "display": "9♠"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 13,
+            "display": "K♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 13,
+            "display": "K♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 9,
+            "display": "9♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 12,
+            "display": "Q♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 13,
+            "display": "K♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 12,
+            "display": "Q♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 11,
+            "display": "J♠"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 12,
+            "display": "Q♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 11,
+            "display": "J♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 10,
+            "display": "10♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 9,
+            "display": "9♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 8,
+            "display": "8♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 7,
+            "display": "7♦"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 13,
+            "display": "K♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 12,
+            "display": "Q♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 11,
+            "display": "J♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 10,
+            "display": "10♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 9,
+            "display": "9♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 8,
+            "display": "8♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 7,
+            "display": "7♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 6,
+            "display": "6♦"
+          }
+        ]
+      ],
+      "free_cells": [
+        {
+          "suit": "DIAMONDS",
+          "rank": 5,
+          "display": "5♦"
+        },
+        {
+          "suit": "SPADES",
+          "rank": 7,
+          "display": "7♠"
+        },
+        {
+          "suit": "DIAMONDS",
+          "rank": 8,
+          "display": "8♦"
+        },
+        {
+          "suit": "DIAMONDS",
+          "rank": 10,
+          "display": "10♦"
+        }
+      ],
+      "foundations": {
+        "SPADES": [
+          {
+            "suit": "SPADES",
+            "rank": 1,
+            "display": "A♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 2,
+            "display": "2♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 3,
+            "display": "3♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 4,
+            "display": "4♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 5,
+            "display": "5♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 6,
+            "display": "6♠"
+          }
+        ],
+        "HEARTS": [
+          {
+            "suit": "HEARTS",
+            "rank": 1,
+            "display": "A♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 2,
+            "display": "2♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 3,
+            "display": "3♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 4,
+            "display": "4♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 5,
+            "display": "5♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 6,
+            "display": "6♥"
+          }
+        ],
+        "CLUBS": [
+          {
+            "suit": "CLUBS",
+            "rank": 1,
+            "display": "A♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 2,
+            "display": "2♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 3,
+            "display": "3♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 4,
+            "display": "4♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 5,
+            "display": "5♣"
+          }
+        ],
+        "DIAMONDS": [
+          {
+            "suit": "DIAMONDS",
+            "rank": 1,
+            "display": "A♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 2,
+            "display": "2♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 3,
+            "display": "3♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 4,
+            "display": "4♦"
+          }
+        ]
+      },
+      "move_history": [
+        [
+          "cascade_to_cascade",
+          3,
+          2,
+          {
+            "suit": "HEARTS",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_cascade",
+          6,
+          2,
+          {
+            "suit": "CLUBS",
+            "rank": 6
+          }
+        ],
+        [
+          "cascade_to_freecell",
+          4,
+          1,
+          {
+            "suit": "SPADES",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_freecell",
+          4,
+          2,
+          {
+            "suit": "DIAMONDS",
+            "rank": 8
+          }
+        ],
+        [
+          "cascade_to_freecell",
+          1,
+          3,
+          {
+            "suit": "DIAMONDS",
+            "rank": 10
+          }
+        ],
+        [
+          "cascade_to_freecell",
+          1,
+          0,
+          {
+            "suit": "DIAMONDS",
+            "rank": 5
+          }
+        ],
+        [
+          "cascade_to_cascade",
+          2,
+          3,
+          {
+            "suit": "CLUBS",
+            "rank": 6
+          }
+        ]
+      ],
+      "max_sequence_length": 1,
+      "max_sequence_to_empty": 1,
+      "empty_free_cells": 0,
+      "empty_cascades": 0,
+      "seed": 11987
+    },
+    "move_count": 7,
+    "start_time": 1774981215.9334667,
+    "seed": 11987,
+    "test_id": "easy-01"
+  },
+  "fdc32898-727e-4278-989f-490b4eca6a06": {
+    "state": {
+      "cascades": [
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 10,
+            "display": "10♣"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 11,
+            "display": "J♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 5,
+            "display": "5♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 10,
+            "display": "10♦"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 8,
+            "display": "8♠"
+          }
+        ],
+        [],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 9,
+            "display": "9♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 8,
+            "display": "8♦"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 13,
+            "display": "K♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 13,
+            "display": "K♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 9,
+            "display": "9♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 12,
+            "display": "Q♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 13,
+            "display": "K♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 12,
+            "display": "Q♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 11,
+            "display": "J♠"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 12,
+            "display": "Q♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 11,
+            "display": "J♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 10,
+            "display": "10♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 9,
+            "display": "9♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 8,
+            "display": "8♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 7,
+            "display": "7♦"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 13,
+            "display": "K♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 12,
+            "display": "Q♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 11,
+            "display": "J♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 10,
+            "display": "10♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 9,
+            "display": "9♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 8,
+            "display": "8♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 7,
+            "display": "7♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 6,
+            "display": "6♦"
+          }
+        ]
+      ],
+      "free_cells": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "foundations": {
+        "SPADES": [
+          {
+            "suit": "SPADES",
+            "rank": 1,
+            "display": "A♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 2,
+            "display": "2♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 3,
+            "display": "3♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 4,
+            "display": "4♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 5,
+            "display": "5♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 6,
+            "display": "6♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 7,
+            "display": "7♠"
+          }
+        ],
+        "HEARTS": [
+          {
+            "suit": "HEARTS",
+            "rank": 1,
+            "display": "A♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 2,
+            "display": "2♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 3,
+            "display": "3♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 4,
+            "display": "4♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 5,
+            "display": "5♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 6,
+            "display": "6♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 7,
+            "display": "7♥"
+          }
+        ],
+        "CLUBS": [
+          {
+            "suit": "CLUBS",
+            "rank": 1,
+            "display": "A♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 2,
+            "display": "2♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 3,
+            "display": "3♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 4,
+            "display": "4♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 5,
+            "display": "5♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 6,
+            "display": "6♣"
+          }
+        ],
+        "DIAMONDS": [
+          {
+            "suit": "DIAMONDS",
+            "rank": 1,
+            "display": "A♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 2,
+            "display": "2♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 3,
+            "display": "3♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 4,
+            "display": "4♦"
+          }
+        ]
+      },
+      "move_history": [
+        [
+          "cascade_to_foundation",
+          6,
+          {
+            "suit": "CLUBS",
+            "rank": 6
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          3,
+          {
+            "suit": "HEARTS",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          4,
+          {
+            "suit": "SPADES",
+            "rank": 7
+          }
+        ]
+      ],
+      "max_sequence_length": 10,
+      "max_sequence_to_empty": 5,
+      "empty_free_cells": 4,
+      "empty_cascades": 1,
+      "seed": 11987
+    },
+    "move_count": 2,
+    "start_time": 1775011301.5697396,
+    "seed": 11987,
+    "test_id": "easy-01"
+  },
+  "f8b7b80d-2ffe-4e60-8c4d-7f3e840fcb33": {
+    "state": {
+      "cascades": [
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 11,
+            "display": "J♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 13,
+            "display": "K♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 2,
+            "display": "2♠"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 4,
+            "display": "4♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 3,
+            "display": "3♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 6,
+            "display": "6♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 6,
+            "display": "6♠"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 2,
+            "display": "2♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 13,
+            "display": "K♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 13,
+            "display": "K♠"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 5,
+            "display": "5♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 10,
+            "display": "10♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 8,
+            "display": "8♠"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 9,
+            "display": "9♣"
+          }
+        ],
+        [
+          {
+            "suit": "HEARTS",
+            "rank": 9,
+            "display": "9♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 9,
+            "display": "9♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 9,
+            "display": "9♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 10,
+            "display": "10♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 4,
+            "display": "4♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 8,
+            "display": "8♦"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 2,
+            "display": "2♥"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 11,
+            "display": "J♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 5,
+            "display": "5♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 12,
+            "display": "Q♦"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 12,
+            "display": "Q♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 10,
+            "display": "10♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 12,
+            "display": "Q♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 6,
+            "display": "6♥"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 5,
+            "display": "5♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 1,
+            "display": "A♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 11,
+            "display": "J♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 4,
+            "display": "4♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 8,
+            "display": "8♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 6,
+            "display": "6♣"
+          }
+        ],
+        [
+          {
+            "suit": "HEARTS",
+            "rank": 7,
+            "display": "7♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 12,
+            "display": "Q♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 1,
+            "display": "A♠"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 1,
+            "display": "A♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 2,
+            "display": "2♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 3,
+            "display": "3♦"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 7,
+            "display": "7♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 13,
+            "display": "K♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 1,
+            "display": "A♥"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 4,
+            "display": "4♦"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 11,
+            "display": "J♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 8,
+            "display": "8♣"
+          }
+        ],
+        [
+          {
+            "suit": "HEARTS",
+            "rank": 5,
+            "display": "5♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 3,
+            "display": "3♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 3,
+            "display": "3♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 7,
+            "display": "7♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 7,
+            "display": "7♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 10,
+            "display": "10♣"
+          }
+        ]
+      ],
+      "free_cells": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "foundations": {
+        "SPADES": [],
+        "HEARTS": [],
+        "CLUBS": [],
+        "DIAMONDS": []
+      },
+      "move_history": [],
+      "max_sequence_length": 5,
+      "max_sequence_to_empty": 5,
+      "empty_free_cells": 4,
+      "empty_cascades": 0,
+      "seed": 1
+    },
+    "move_count": 0,
+    "start_time": 1775011301.5702493,
+    "seed": 1,
+    "test_id": null
+  },
+  "ba7e5960-1ec5-454b-8959-281d484a9252": {
+    "state": {
+      "cascades": [
+        [
+          {
+            "suit": "HEARTS",
+            "rank": 1,
+            "display": "A♥"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 3,
+            "display": "3♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 13,
+            "display": "K♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 11,
+            "display": "J♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 6,
+            "display": "6♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 11,
+            "display": "J♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 13,
+            "display": "K♣"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 1,
+            "display": "A♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 3,
+            "display": "3♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 6,
+            "display": "6♥"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 5,
+            "display": "5♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 2,
+            "display": "2♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 7,
+            "display": "7♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 8,
+            "display": "8♦"
+          }
+        ],
+        [
+          {
+            "suit": "HEARTS",
+            "rank": 4,
+            "display": "4♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 12,
+            "display": "Q♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 5,
+            "display": "5♠"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 5,
+            "display": "5♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 10,
+            "display": "10♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 8,
+            "display": "8♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 2,
+            "display": "2♠"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 1,
+            "display": "A♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 12,
+            "display": "Q♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 4,
+            "display": "4♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 8,
+            "display": "8♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 12,
+            "display": "Q♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 9,
+            "display": "9♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 3,
+            "display": "3♠"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 2,
+            "display": "2♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 8,
+            "display": "8♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 9,
+            "display": "9♥"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 9,
+            "display": "9♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 6,
+            "display": "6♦"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 2,
+            "display": "2♥"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 6,
+            "display": "6♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 7,
+            "display": "7♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 11,
+            "display": "J♥"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 10,
+            "display": "10♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 10,
+            "display": "10♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 12,
+            "display": "Q♦"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 10,
+            "display": "10♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 1,
+            "display": "A♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 9,
+            "display": "9♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 13,
+            "display": "K♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 4,
+            "display": "4♠"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 4,
+            "display": "4♣"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 11,
+            "display": "J♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 13,
+            "display": "K♠"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 3,
+            "display": "3♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 7,
+            "display": "7♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 7,
+            "display": "7♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 5,
+            "display": "5♥"
+          }
+        ]
+      ],
+      "free_cells": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "foundations": {
+        "SPADES": [],
+        "HEARTS": [],
+        "CLUBS": [],
+        "DIAMONDS": []
+      },
+      "move_history": [],
+      "max_sequence_length": 5,
+      "max_sequence_to_empty": 5,
+      "empty_free_cells": 4,
+      "empty_cascades": 0,
+      "seed": 11982
+    },
+    "move_count": 0,
+    "start_time": 1775011301.5702493,
+    "seed": 11982,
+    "test_id": "hard-02"
+  },
+  "2e848e42-7fde-463b-9986-7e479b7e4f9f": {
+    "state": {
+      "cascades": [
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 10,
+            "display": "10♣"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 11,
+            "display": "J♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 5,
+            "display": "5♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 10,
+            "display": "10♦"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 8,
+            "display": "8♠"
+          }
+        ],
+        [],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 9,
+            "display": "9♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 8,
+            "display": "8♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 7,
+            "display": "7♠"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 13,
+            "display": "K♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 13,
+            "display": "K♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 9,
+            "display": "9♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 12,
+            "display": "Q♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 13,
+            "display": "K♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 12,
+            "display": "Q♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 11,
+            "display": "J♠"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 12,
+            "display": "Q♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 11,
+            "display": "J♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 10,
+            "display": "10♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 9,
+            "display": "9♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 8,
+            "display": "8♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 7,
+            "display": "7♦"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 13,
+            "display": "K♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 12,
+            "display": "Q♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 11,
+            "display": "J♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 10,
+            "display": "10♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 9,
+            "display": "9♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 8,
+            "display": "8♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 7,
+            "display": "7♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 6,
+            "display": "6♦"
+          }
+        ]
+      ],
+      "free_cells": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "foundations": {
+        "SPADES": [
+          {
+            "suit": "SPADES",
+            "rank": 1,
+            "display": "A♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 2,
+            "display": "2♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 3,
+            "display": "3♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 4,
+            "display": "4♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 5,
+            "display": "5♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 6,
+            "display": "6♠"
+          }
+        ],
+        "HEARTS": [
+          {
+            "suit": "HEARTS",
+            "rank": 1,
+            "display": "A♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 2,
+            "display": "2♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 3,
+            "display": "3♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 4,
+            "display": "4♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 5,
+            "display": "5♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 6,
+            "display": "6♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 7,
+            "display": "7♥"
+          }
+        ],
+        "CLUBS": [
+          {
+            "suit": "CLUBS",
+            "rank": 1,
+            "display": "A♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 2,
+            "display": "2♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 3,
+            "display": "3♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 4,
+            "display": "4♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 5,
+            "display": "5♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 6,
+            "display": "6♣"
+          }
+        ],
+        "DIAMONDS": [
+          {
+            "suit": "DIAMONDS",
+            "rank": 1,
+            "display": "A♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 2,
+            "display": "2♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 3,
+            "display": "3♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 4,
+            "display": "4♦"
+          }
+        ]
+      },
+      "move_history": [
+        [
+          "cascade_to_foundation",
+          6,
+          {
+            "suit": "CLUBS",
+            "rank": 6
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          3,
+          {
+            "suit": "HEARTS",
+            "rank": 7
+          }
+        ]
+      ],
+      "max_sequence_length": 10,
+      "max_sequence_to_empty": 5,
+      "empty_free_cells": 4,
+      "empty_cascades": 1,
+      "seed": 11987
+    },
+    "move_count": 1,
+    "start_time": 1775011301.5712686,
+    "seed": 11987,
+    "test_id": "easy-01"
+  },
+  "b46a7156-bfe1-4a53-a620-c5b5346a9b64": {
+    "state": {
+      "cascades": [
+        [],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 11,
+            "display": "J♦"
+          }
+        ],
+        [],
+        [],
+        [],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 13,
+            "display": "K♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 13,
+            "display": "K♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 9,
+            "display": "9♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 12,
+            "display": "Q♣"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 13,
+            "display": "K♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 12,
+            "display": "Q♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 11,
+            "display": "J♠"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 12,
+            "display": "Q♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 11,
+            "display": "J♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 10,
+            "display": "10♠"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 13,
+            "display": "K♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 12,
+            "display": "Q♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 11,
+            "display": "J♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 10,
+            "display": "10♥"
+          }
+        ]
+      ],
+      "free_cells": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "foundations": {
+        "SPADES": [
+          {
+            "suit": "SPADES",
+            "rank": 1,
+            "display": "A♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 2,
+            "display": "2♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 3,
+            "display": "3♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 4,
+            "display": "4♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 5,
+            "display": "5♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 6,
+            "display": "6♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 7,
+            "display": "7♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 8,
+            "display": "8♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 9,
+            "display": "9♠"
+          }
+        ],
+        "HEARTS": [
+          {
+            "suit": "HEARTS",
+            "rank": 1,
+            "display": "A♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 2,
+            "display": "2♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 3,
+            "display": "3♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 4,
+            "display": "4♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 5,
+            "display": "5♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 6,
+            "display": "6♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 7,
+            "display": "7♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 8,
+            "display": "8♥"
+          }
+        ],
+        "CLUBS": [
+          {
+            "suit": "CLUBS",
+            "rank": 1,
+            "display": "A♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 2,
+            "display": "2♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 3,
+            "display": "3♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 4,
+            "display": "4♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 5,
+            "display": "5♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 6,
+            "display": "6♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 7,
+            "display": "7♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 8,
+            "display": "8♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 9,
+            "display": "9♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 10,
+            "display": "10♣"
+          }
+        ],
+        "DIAMONDS": [
+          {
+            "suit": "DIAMONDS",
+            "rank": 1,
+            "display": "A♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 2,
+            "display": "2♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 3,
+            "display": "3♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 4,
+            "display": "4♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 5,
+            "display": "5♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 6,
+            "display": "6♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 7,
+            "display": "7♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 8,
+            "display": "8♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 9,
+            "display": "9♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 10,
+            "display": "10♦"
+          }
+        ]
+      },
+      "move_history": [
+        [
+          "cascade_to_foundation",
+          3,
+          {
+            "suit": "HEARTS",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_freecell",
+          1,
+          0,
+          {
+            "suit": "DIAMONDS",
+            "rank": 10
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          1,
+          {
+            "suit": "DIAMONDS",
+            "rank": 5
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          6,
+          {
+            "suit": "CLUBS",
+            "rank": 6
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          7,
+          {
+            "suit": "DIAMONDS",
+            "rank": 6
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          4,
+          {
+            "suit": "SPADES",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          6,
+          {
+            "suit": "DIAMONDS",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          7,
+          {
+            "suit": "CLUBS",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          2,
+          {
+            "suit": "SPADES",
+            "rank": 8
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          4,
+          {
+            "suit": "DIAMONDS",
+            "rank": 8
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          6,
+          {
+            "suit": "CLUBS",
+            "rank": 8
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          7,
+          {
+            "suit": "HEARTS",
+            "rank": 8
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          4,
+          {
+            "suit": "SPADES",
+            "rank": 9
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          6,
+          {
+            "suit": "DIAMONDS",
+            "rank": 9
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          7,
+          {
+            "suit": "CLUBS",
+            "rank": 9
+          }
+        ],
+        [
+          "freecell_to_foundation",
+          0,
+          {
+            "suit": "DIAMONDS",
+            "rank": 10
+          }
+        ],
+        [
+          "cascade_to_foundation",
+          0,
+          {
+            "suit": "CLUBS",
+            "rank": 10
+          }
+        ]
+      ],
+      "max_sequence_length": 80,
+      "max_sequence_to_empty": 40,
+      "empty_free_cells": 4,
+      "empty_cascades": 4,
+      "seed": 11987
+    },
+    "move_count": 3,
+    "start_time": 1775011301.5712686,
+    "seed": 11987,
+    "test_id": "easy-01"
+  },
+  "876f5bf3-f12e-4f0c-ac80-ce8a084c28c6": {
+    "state": {
+      "cascades": [
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 10,
+            "display": "10♣"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 11,
+            "display": "J♦"
+          }
+        ],
+        [
+          {
+            "suit": "HEARTS",
+            "rank": 9,
+            "display": "9♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 8,
+            "display": "8♠"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 12,
+            "display": "Q♣"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 13,
+            "display": "K♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 12,
+            "display": "Q♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 11,
+            "display": "J♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 10,
+            "display": "10♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 9,
+            "display": "9♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 8,
+            "display": "8♦"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 7,
+            "display": "7♠"
+          }
+        ],
+        [
+          {
+            "suit": "CLUBS",
+            "rank": 13,
+            "display": "K♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 13,
+            "display": "K♥"
+          }
+        ],
+        [
+          {
+            "suit": "SPADES",
+            "rank": 12,
+            "display": "Q♠"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 11,
+            "display": "J♥"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 10,
+            "display": "10♠"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 9,
+            "display": "9♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 8,
+            "display": "8♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 7,
+            "display": "7♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 6,
+            "display": "6♣"
+          }
+        ],
+        [
+          {
+            "suit": "DIAMONDS",
+            "rank": 13,
+            "display": "K♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 12,
+            "display": "Q♦"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 11,
+            "display": "J♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 10,
+            "display": "10♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 9,
+            "display": "9♣"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 8,
+            "display": "8♥"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 7,
+            "display": "7♣"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 6,
+            "display": "6♦"
+          }
+        ]
+      ],
+      "free_cells": [
+        null,
+        null,
+        null,
+        {
+          "suit": "DIAMONDS",
+          "rank": 5,
+          "display": "5♦"
+        }
+      ],
+      "foundations": {
+        "SPADES": [
+          {
+            "suit": "SPADES",
+            "rank": 1,
+            "display": "A♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 2,
+            "display": "2♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 3,
+            "display": "3♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 4,
+            "display": "4♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 5,
+            "display": "5♠"
+          },
+          {
+            "suit": "SPADES",
+            "rank": 6,
+            "display": "6♠"
+          }
+        ],
+        "HEARTS": [
+          {
+            "suit": "HEARTS",
+            "rank": 1,
+            "display": "A♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 2,
+            "display": "2♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 3,
+            "display": "3♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 4,
+            "display": "4♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 5,
+            "display": "5♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 6,
+            "display": "6♥"
+          },
+          {
+            "suit": "HEARTS",
+            "rank": 7,
+            "display": "7♥"
+          }
+        ],
+        "CLUBS": [
+          {
+            "suit": "CLUBS",
+            "rank": 1,
+            "display": "A♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 2,
+            "display": "2♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 3,
+            "display": "3♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 4,
+            "display": "4♣"
+          },
+          {
+            "suit": "CLUBS",
+            "rank": 5,
+            "display": "5♣"
+          }
+        ],
+        "DIAMONDS": [
+          {
+            "suit": "DIAMONDS",
+            "rank": 1,
+            "display": "A♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 2,
+            "display": "2♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 3,
+            "display": "3♦"
+          },
+          {
+            "suit": "DIAMONDS",
+            "rank": 4,
+            "display": "4♦"
+          }
+        ]
+      },
+      "move_history": [
+        [
+          "cascade_to_foundation",
+          3,
+          {
+            "suit": "HEARTS",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_cascade",
+          4,
+          3,
+          {
+            "suit": "SPADES",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_cascade",
+          3,
+          4,
+          {
+            "suit": "SPADES",
+            "rank": 7
+          }
+        ],
+        [
+          "cascade_to_cascade_sequence",
+          4,
+          3,
+          3,
+          [
+            {
+              "suit": "SPADES",
+              "rank": 9
+            },
+            {
+              "suit": "DIAMONDS",
+              "rank": 8
+            },
+            {
+              "suit": "SPADES",
+              "rank": 7
+            }
+          ]
+        ],
+        [
+          "cascade_to_cascade_sequence",
+          3,
+          1,
+          3,
+          [
+            {
+              "suit": "SPADES",
+              "rank": 9
+            },
+            {
+              "suit": "DIAMONDS",
+              "rank": 8
+            },
+            {
+              "suit": "SPADES",
+              "rank": 7
+            }
+          ]
+        ],
+        [
+          "cascade_to_cascade_sequence",
+          1,
+          3,
+          4,
+          [
+            {
+              "suit": "DIAMONDS",
+              "rank": 10
+            },
+            {
+              "suit": "SPADES",
+              "rank": 9
+            },
+            {
+              "suit": "DIAMONDS",
+              "rank": 8
+            },
+            {
+              "suit": "SPADES",
+              "rank": 7
+            }
+          ]
+        ],
+        [
+          "cascade_to_freecell",
+          1,
+          3,
+          {
+            "suit": "DIAMONDS",
+            "rank": 5
+          }
+        ],
+        [
+          "cascade_to_cascade_sequence",
+          3,
+          5,
+          4,
+          [
+            {
+              "suit": "DIAMONDS",
+              "rank": 10
+            },
+            {
+              "suit": "SPADES",
+              "rank": 9
+            },
+            {
+              "suit": "DIAMONDS",
+              "rank": 8
+            },
+            {
+              "suit": "SPADES",
+              "rank": 7
+            }
+          ]
+        ],
+        [
+          "cascade_to_cascade_sequence",
+          5,
+          4,
+          7,
+          [
+            {
+              "suit": "SPADES",
+              "rank": 13
+            },
+            {
+              "suit": "HEARTS",
+              "rank": 12
+            },
+            {
+              "suit": "SPADES",
+              "rank": 11
+            },
+            {
+              "suit": "DIAMONDS",
+              "rank": 10
+            },
+            {
+              "suit": "SPADES",
+              "rank": 9
+            },
+            {
+              "suit": "DIAMONDS",
+              "rank": 8
+            },
+            {
+              "suit": "SPADES",
+              "rank": 7
+            }
+          ]
+        ],
+        [
+          "cascade_to_cascade",
+          5,
+          3,
+          {
+            "suit": "CLUBS",
+            "rank": 12
+          }
+        ],
+        [
+          "cascade_to_cascade",
+          2,
+          5,
+          {
+            "suit": "SPADES",
+            "rank": 8
+          }
+        ],
+        [
+          "cascade_to_cascade_sequence",
+          5,
+          2,
+          2,
+          [
+            {
+              "suit": "HEARTS",
+              "rank": 9
+            },
+            {
+              "suit": "SPADES",
+              "rank": 8
+            }
+          ]
+        ]
+      ],
+      "max_sequence_length": 4,
+      "max_sequence_to_empty": 4,
+      "empty_free_cells": 3,
+      "empty_cascades": 0,
+      "seed": 11987
+    },
+    "move_count": 12,
+    "start_time": 1775011301.5722568,
+    "seed": 11987,
+    "test_id": "easy-01"
+  }
+}
