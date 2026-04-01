@@ -52,26 +52,26 @@
     },
     {
       "id": "03",
-      "origin_seed": 11987,
+      "origin_seed": 5152,
       "category": "easy",
       "description": "3 moves to win.",
       "state_data": {
         "cascades": [
-          ["10C"],
-          ["JD", "5D", "10D"],
-          ["8S"],
-          ["7H"],
-          ["9S", "8D", "7S"],
-          ["KC", "KH", "9H", "QC", "KS", "QH", "JS"],
-          ["QS", "JH", "10S", "9D", "8C", "7D", "6C"],
-          ["KD", "QD", "JC", "10H", "9C", "8H", "7C", "6D"]
+          ["KH", "QS"],
+          ["KD","QC","JH","10S","9H"],
+          ["10D","9D"],
+          ["QH","8C","8S","6D","8D"],
+          [],
+          ["KS","QD","JS","10H","9C","8H", "7C"],
+          ["KC","7H","JD","10C"],
+          ["9S","JC","7D"]
         ],
         "free_cells": [null,null,null,null],
         "foundations": {
-          "SPADES": 6,
+          "SPADES": 7,
           "HEARTS": 6,
-          "CLUBS": 5,
-          "DIAMONDS": 4
+          "CLUBS": 6,
+          "DIAMONDS": 5
         }
       }
     },
