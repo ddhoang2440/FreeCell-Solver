@@ -92,7 +92,7 @@ class UCSSolver(BaseSolver):
         )
         empty_count = sum(1 for col in state.cascades if not col)
         fd_key = tuple(
-            (str(suit), len(pile))
+            (suit.name if hasattr(suit, 'name') else str(suit), len(pile))
             for suit, pile in sorted(state.foundations.items(),
                                      key=lambda x: str(x[0]))
         )
@@ -286,8 +286,9 @@ class UCSSolver(BaseSolver):
     # ------------------------------------------------------------------ #
     #  Main search                                                         #
     # ------------------------------------------------------------------ #
-    def solve(self, max_nodes: float = float("inf"),
+    def solve(self, node_limit: int = 500000,
               max_time: int = 86400) -> Optional[List[Tuple]]:
+        max_nodes = node_limit
         """
         UCS chuẩn với:
           - Cost additive-only (range 1–4), không state delta
