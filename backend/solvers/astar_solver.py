@@ -2,13 +2,13 @@
 import heapq
 import time
 from typing import List, Tuple, Optional, Dict
-from backend.solvers.base_solver import BaseSolver
-from backend.game_state import FreeCellState
-from backend.card import Card, Rank, Suit
+from solvers.base_solver import BaseSolver
+from game_state import FreeCellState
+from card import Card, Rank, Suit
 
 class AStarSolver(BaseSolver):
-    def __init__(self, initial_state: FreeCellState):
-        super().__init__(initial_state)
+    def __init__(self, initial_state: FreeCellState, **kwargs):
+        super().__init__(initial_state, **kwargs)
         self.priority_queue = []
         self.g_score: Dict[int, int] = {}
         self.f_score: Dict[int, int] = {}
@@ -116,6 +116,9 @@ class AStarSolver(BaseSolver):
         
         return max(0, min(99, progress))
     def _send_progress(self, current_state: FreeCellState, current_path: List):
+        if getattr(self, 'cancelled', False):
+                return None
+        
         current_time = time.time()
 
         time_diff = current_time - self.last_progress_time
@@ -177,7 +180,7 @@ class AStarSolver(BaseSolver):
         else:
             return f"~{int(estimated_seconds/3600)}h"
         
-    def solve(self, max_nodes: int = 500000, max_time: int = 300) -> Optional[List[Tuple]]:
+    def solve(self, node_limit: int = 500000, max_time: int = 86400) -> Optional[List[Tuple]]:
         self.priority_queue.clear()
         self.g_score.clear()
         self.f_score.clear()
@@ -201,32 +204,13 @@ class AStarSolver(BaseSolver):
         
         counter = 1
         
-        while self.priority_queue and self.expanded_nodes < max_nodes:
+        while self.priority_queue and self.expanded_nodes < node_limit:
             current_time = time.time()
             if current_time - self.start_time > max_time:
                 print(f"Time limit reached after {self.expanded_nodes} nodes")
                 return None
                 
             current_f, current_g, depth, current_state, path = heapq.heappop(self.priority_queue)
-            current_hash = hash(current_state)
-            
-            if self.expanded_nodes % 5000 == 0:
-                elapsed = current_time - self.start_time
-                rate = self.expanded_nodes / elapsed if elapsed > 0 else 0
-                print(f"Nodes: {self.expanded_nodes}, Rate: {rate:.0f} n/s, "
-                      f"Queue: {len(self.priority_queue)}, f: {current_f:.1f}, "
-                      f"g: {current_g}, Depth: {len(path)}")
-                self._send_progress(current_state, path)
-            
-            if current_g > self.g_score.get(current_hash, float('inf')):
-                continue
-            
-            if current_hash in self.visited:
-                if self.visited[current_hash] <= len(path):
-                    continue
-            
-            self.visited[current_hash] = len(path)
-            self.expanded_nodes += 1
             
             if current_state.is_goal():
                 elapsed = time.time() - self.start_time
@@ -234,7 +218,6 @@ class AStarSolver(BaseSolver):
                 print(f"  Nodes expanded: {self.expanded_nodes}")
                 print(f"  Time: {elapsed:.2f}s")
                 print(f"  Solution length: {len(path)} moves")
-                print(f"  Rate: {self.expanded_nodes/elapsed:.0f} nodes/sec")
                 self.solution = path
                 
                 if self.socketio:
@@ -247,9 +230,17 @@ class AStarSolver(BaseSolver):
                         'solution_length': len(path),
                         'optimal': True
                     })
-                
                 return path
+
+            state_hash = hash(current_state)
+            if state_hash in self.visited and self.visited[state_hash] <= current_g:
+                continue
+            self.visited[state_hash] = current_g
             
+            self.expanded_nodes += 1
+            if self.expanded_nodes % 1000 == 0:
+                self._send_progress(current_state, path)
+                
             moves = self._get_moves_cached(current_state)
             moves = self._sort_moves_by_priority(moves, current_state)
             
@@ -257,13 +248,11 @@ class AStarSolver(BaseSolver):
                 new_state = current_state.apply_move(move)
                 if new_state is None or new_state is current_state:
                     continue
-                    
+                
+                if hasattr(new_state, 'auto_move_to_foundation'):
+                    new_state.auto_move_to_foundation()
+
                 new_hash = hash(new_state)
-                
-                if new_hash in self.visited:
-                    if self.visited[new_hash] <= len(path) + 1:
-                        continue
-                
                 tentative_g = current_g + 1
                 
                 if new_hash not in self.g_score or tentative_g < self.g_score[new_hash]:

@@ -1,20 +1,33 @@
 import json
 import os
-from backend.card import Card, Suit, Rank
-from backend.game_state import FreeCellState
+from card import Card, Suit, Rank
+from game_state import FreeCellState
 
 def load_tests_config():
-    """Loads custom tests json file"""
-    import os
-    # Trỏ đúng đến file custom_tests.json với đường dẫn tuyệt đối tĩnh để app API cũng load được
+    """Loads custom tests json file significantly more robustly"""
+    # Chiến thuật 1: Tìm theo đường dẫn tương đối từ file __file__
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_dir, 'tests', 'fixtures', 'custom_tests.json')
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return json.load(f).get('test_cases', [])
-    except Exception as e:
-        print(f"Error loading custom_tests.json: {e}")
-        return []
+    possible_paths = [
+        os.path.join(current_dir, 'tests', 'fixtures', 'custom_tests.json'),
+        os.path.join(current_dir, 'fixtures', 'custom_tests.json'),
+        os.path.join(os.getcwd(), 'backend', 'tests', 'fixtures', 'custom_tests.json'),
+        os.path.join(os.getcwd(), 'tests', 'fixtures', 'custom_tests.json'),
+    ]
+    
+    for file_path in possible_paths:
+        if os.path.exists(file_path):
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    test_cases = data.get('test_cases', [])
+                    if test_cases:
+                        print(f"DEBUG: Successfully loaded {len(test_cases)} tests from {file_path}")
+                        return test_cases
+            except Exception as e:
+                print(f"DEBUG: Found file at {file_path} but error reading: {e}")
+                
+    print(f"CRITICAL ERROR: custom_tests.json NOT FOUND. Tried paths: {possible_paths}")
+    return []
 
 def parse_card(s):
     if not s:

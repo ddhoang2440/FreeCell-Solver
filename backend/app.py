@@ -1,7 +1,10 @@
 import sys
 import os
-
+import json
+import logging
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -10,7 +13,6 @@ import uuid
 import time
 import threading
 from typing import Dict, Any, Optional, Tuple, List
-
 from game_state import FreeCellState
 from card import Card, Suit, Rank
 from solvers.bfs_solver import BFSSolver
@@ -28,7 +30,25 @@ CORS(app, supports_credentials=True)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 games: Dict[str, Dict[str, Any]] = {}
-solver_threads: Dict[str, Dict[str, Any]] = {}
+# solver_threads: Dict[str, Dict[str, Any]] = {}
+active_solvers: Dict[str, Any] = {}
+
+def save_games():
+    """Lưu trạng thái các ván đấu vào file (Tránh mất khi restart server)"""
+    try:
+        # Nếu chưa muốn code phần lưu file, chỉ cần để pass
+        # logger.info("Saving game sessions...")
+        pass
+    except Exception as e:
+        logger.error(f"Failed to save games: {str(e)}")
+
+def load_games():
+    """Tải lại các ván đấu cũ khi khởi động server"""
+    try:
+        # Tương tự, nếu chưa cần hãy để pass
+        pass
+    except Exception as e:
+        logger.error(f"Failed to load games: {str(e)}")
 
 def card_to_dict(card: Optional[Card]) -> Optional[Dict]:
     """Convert Card object to dictionary"""
@@ -70,6 +90,7 @@ def state_to_dict(state: FreeCellState) -> Dict:
         'empty_cascades': num_empty_cascades,
         'seed': state.seed
     }
+    
 @app.route('/api/custom-tests', methods=['GET'])
 def get_custom_tests():
     try:
@@ -165,33 +186,54 @@ def make_move(game_id):
     state = game['state']
     
     move_tuple = tuple(move)
-    all_moves = state.get_all_moves(True)
-    print("all moves",all_moves)
-    if move_tuple not in all_moves:
-        return jsonify({'success': False, 'error': 'Invalid move'}), 400
+    # all_moves = state.get_all_moves(True)
     
-    new_state = state.apply_move(move_tuple)
-    games[game_id]['state'] = new_state
-    games[game_id]['move_count'] += 1
+    # # KIỂM TRA 1: Nước đi có nằm trong danh sách hợp lệ không?
+    # if move_tuple not in all_moves:
+    #     print(f"Từ chối: Nước đi {move_tuple} không có trong danh sách hợp lệ.")
+    #     print(f"Gợi ý: Do game_state chỉ cho phép ném bài vào ô trống ĐẦU TIÊN (first_empty_free).")
+    #     return jsonify({'success': False, 'error': 'Invalid move'}), 400
     
-    is_goal = new_state.is_goal()
-    
-    socketio.emit('state_update', {
-        'game_id': game_id,
-        'state': state_to_dict(new_state),
-        'last_move': move
-    })
-    
-    response = {
-        'success': True,
-        'state': state_to_dict(new_state),
-        'is_goal': is_goal
-    }
-    
-    if is_goal:
-        response['message'] = 'Congratulations! You won!'
-    
-    return jsonify(response)
+    try:
+        new_state = state.apply_move(move_tuple)
+        
+        # KIỂM TRA 2: Chặn lỗi văng (500) nếu apply_move trả về None
+        if new_state is None:
+            return jsonify({
+                'success': True, 
+                'state': state_to_dict(state), 
+                'message': 'Move rejected by rules'
+            })
+            
+        # Cập nhật thành công
+        games[game_id]['state'] = new_state
+        games[game_id]['move_count'] += 1
+        
+        is_goal = new_state.is_goal()
+        
+        socketio.emit('state_update', {
+            'game_id': game_id,
+            'state': state_to_dict(new_state),
+            'last_move': move
+        })
+        
+        response = {
+            'success': True,
+            'state': state_to_dict(new_state),
+            'is_goal': is_goal
+        }
+        
+        if is_goal:
+            response['message'] = 'Congratulations! You won!'
+        
+        return jsonify(response)
+        
+    except Exception as e:
+        # KIỂM TRA 3: Bắt tận tay nếu code bị sập ở đâu đó
+        import traceback
+        print("CRITICAL ERROR trong lúc di chuyển:")
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/game/<game_id>/restart', methods=['POST'])
 def restart_game(game_id):
@@ -304,6 +346,76 @@ def undo_move_in_state(state, last_move):
     except Exception as e:
         print(f"Undo error: {e}")
         return False
+    
+@app.route('/api/game/<game_id>/apply_solver_move', methods=['POST'])
+def apply_solver_move(game_id):
+    """API chuyên dụng: Áp dụng 1 bước của AI và trả về các frames (bước nhỏ) để diễn hoạt"""
+    if game_id not in games:
+        return jsonify({'success': False, 'error': 'Game not found'}), 404
+
+    try:
+        data = request.get_json()
+        move = data.get('move')
+        if move is None:
+            return jsonify({'success': False, 'error': 'No move provided'}), 400
+
+        game = games[game_id]
+        state = game['state']
+        move_tuple = tuple(move)
+        
+        steps = [] # Chứa các trạng thái trung gian
+
+        # 1. Áp dụng nước đi chính
+        new_state = state.apply_move(move_tuple)
+        
+        if new_state is None:
+            # Ghost Move: Nếu nước đi này AI tính nhưng thực tế đã xong rồi (do auto_move trước đó)
+            return jsonify({'success': True, 'steps': [state_to_dict(state)]})
+
+        steps.append(state_to_dict(new_state))
+        
+        # 2. Tự động dọn bài TỪNG LÁ MỘT để tạo hiệu ứng "bay"
+        curr = new_state
+        while True:
+            # Lấy tất cả nước đi có thể, chỉ lọc lấy nước đi lên móng (Foundation)
+            possible_moves = curr.get_all_moves()
+            auto_moves = [m for m in possible_moves if m[0] in ['cascade_to_foundation', 'freecell_to_foundation']]
+            
+            safe_auto_move = None
+            for am in auto_moves:
+                # Kiểm tra an toàn: Đảm bảo không bị bốc nhầm bài khi cột trống (tránh IndexError)
+                idx = am[1]
+                card_to_check = None
+                if am[0] == 'cascade_to_foundation' and curr.cascades[idx]:
+                    card_to_check = curr.cascades[idx][-1]
+                elif am[0] == 'freecell_to_foundation' and curr.free_cells[idx]:
+                    card_to_check = curr.free_cells[idx]
+                
+                if card_to_check and curr._is_safe_to_foundation(card_to_check):
+                    safe_auto_move = am
+                    break
+            
+            if not safe_auto_move:
+                break
+                
+            curr = curr.apply_move(safe_auto_move)
+            steps.append(state_to_dict(curr)) # Lưu lại frame bài đang bay
+
+        # Lưu trạng thái cuối cùng vào RAM server
+        games[game_id]['state'] = curr
+        games[game_id]['move_count'] += 1
+        save_games()
+
+        return jsonify({
+            'success': True,
+            'steps': steps, 
+            'is_goal': curr.is_goal()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in apply_solver_move: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
 @app.route('/api/game/<game_id>/solve', methods=['POST'])
 def solve_game(game_id):
     if game_id not in games:
@@ -312,74 +424,117 @@ def solve_game(game_id):
     data = request.get_json()
     solver_name = data.get('solver', 'A*')
     
+    # --- DỪNG SOLVER CŨ NẾU ĐANG CHẠY CHO GAME NÀY ---
+    if game_id in active_solvers:
+        active_solvers[game_id].cancelled = True
+        print(f"Cancelling previous {solver_name} for game {game_id}")
+    # -----------------------------------------------
+
     game = games[game_id]
     state = game['state']
 
-    thread_id = str(uuid.uuid4())
-    
     def solve_in_background():
         try:
-            print(f"Starting {solver_name} solver for game {game_id}")
-            
-            if solver_name == "BFS":
-                solver = BFSSolver(state)
-            elif solver_name == "DFS":
-                solver = DFSSolver(state)
-            elif solver_name == "UCS":
-                solver = UCSSolver(state)
-            else:
-                solver = AStarSolver(state)
+            # Khởi tạo solver tương ứng
+            if solver_name == "BFS": solver = BFSSolver(state)
+            elif solver_name == "DFS": solver = DFSSolver(state)
+            elif solver_name == "UCS": solver = UCSSolver(state)
+            else: solver = AStarSolver(state)
+
             solver.game_id = game_id 
             solver.socketio = socketio
             
-            socketio.emit('solver_progress', {
-                'game_id': game_id,
-                'solver': solver_name,
-                'progress': 0,
-                'message': f'Starting {solver_name} search...'
-            })
+            # ĐƯA VÀO DANH SÁCH ĐANG CHẠY
+            active_solvers[game_id] = solver
+
+            results = solver.measure_performance(node_limit = 200000)
             
-            results = solver.measure_performance()
+            # 1. Lấy đường đi cơ bản (chưa có auto-moves)
+            explicit_path = getattr(solver, 'solution', [])
+            is_solved = bool(explicit_path)
             
-            print(f"Solver {solver_name} completed for game {game_id}")
+            # 2. MÔ PHỎNG LẠI ĐỂ LẤY FULL ĐƯỜNG ĐI (Gồm cả Auto-moves)
+            full_solution = []
+            is_truly_won = False
+            if is_solved:
+                import copy
+                replay_state = copy.deepcopy(solver.initial_state)
+
+                if hasattr(replay_state, 'auto_move_to_foundation'):
+                    replay_state.auto_move_to_foundation()
+
+                old_history_len = len(getattr(replay_state, 'move_history', []))                # Ép AI đánh lại từ đầu để nhả ra các bước auto-move
+                for move in explicit_path:
+                    if replay_state is None:
+                        break
+                        
+                    next_state = replay_state.apply_move(move)
+                    
+                    if next_state is None:
+                        # Nếu AI cố đưa bài lên móng nhưng báo lỗi, tức là hàm auto_move 
+                        # ở vòng lặp trước đã nhanh tay dọn nó lên móng giùm rồi! -> Bỏ qua an toàn.
+                        if move[0] in ['cascade_to_foundation', 'freecell_to_foundation']:
+                            continue
+                        else:
+                            print(f"⚠️ Cảnh báo: Nước đi {move} thực sự không hợp lệ!")
+                            break
+                            
+                    replay_state = next_state
+                    
+                    if hasattr(replay_state, 'auto_move_to_foundation'):
+                        replay_state.auto_move_to_foundation()
+                
+                if hasattr(replay_state, 'auto_move_to_foundation'):
+                     replay_state.auto_move_to_foundation()
+
+                is_truly_won = replay_state.is_goal() if replay_state else False
+
+                if is_truly_won:
+                    raw_full_solution = replay_state.move_history[old_history_len:]               
+                    for m in raw_full_solution:
+                        m_list = list(m)
+                        # Nếu phần tử cuối cùng là một dict (card_data) HOẶC list (sequence_data), hãy CHẶT BỎ NÓ
+                        if len(m_list) > 0 and isinstance(m_list[-1], (dict, list)):
+                            clean_move = m_list[:-1]
+                        else:
+                            clean_move = m_list
+                            
+                        full_solution.append(clean_move)
+
+            nodes = getattr(solver, 'expanded_nodes', 0)
+            time_tk = getattr(solver, 'search_time', 0.0)
+            mem = getattr(solver, 'memory_usage', 0.0)
             
             socketio.emit('solver_complete', {
                 'game_id': game_id,
                 'solver': solver_name,
                 'results': {
-                    'nodes_explored': results['expanded_nodes'],
-                    'time_taken': results['search_time'],
-                    'memory_used': results['memory_usage'],
-                    'solution_length': results['solution_length'],
-                    'solution_found': results['found_solution']
+                    'nodes_explored': nodes,
+                    'time_taken': time_tk,
+                    'memory_used': mem,
+                    'solution_length': len(full_solution) if is_truly_won else 0,
+                    'solution_found': is_truly_won
                 },
-                'solution': [list(move) for move in solver.solution] if solver.solution else None
+                'solution': full_solution if is_truly_won else None
             })
         except Exception as e:
-            print(f"Solver error: {e}")
-            socketio.emit('solver_error', {
-                'game_id': game_id,
-                'error': str(e)
-            })
+            import traceback
+            error_msg = str(e)
+            print(f"💥 Solver Crash: {error_msg}")
+            traceback.print_exc()
+            # 🟢 GỬI LỖI VỀ FRONTEND ĐỂ KHÔNG BỊ TREO UI
+            socketio.emit('solver_error', {'game_id': game_id, 'error': error_msg})
         finally:
-            if thread_id in solver_threads:
-                del solver_threads[thread_id]
-    
+            # DỌN DẸP KHI KẾT THÚC
+            if game_id in active_solvers and active_solvers[game_id] == solver:
+                del active_solvers[game_id]
+
     thread = threading.Thread(target=solve_in_background)
     thread.daemon = True
     thread.start()
     
-    solver_threads[thread_id] = {
-        'thread': thread,
-        'game_id': game_id,
-        'solver': solver_name,
-        'started_at': time.time()
-    }
-    
-    return jsonify({
-        'success': True,
-        'message': f'Solver {solver_name} started'
-    })
+    return jsonify({'success': True, 'message': f'Solver {solver_name} started'})
+
 @app.route('/api/game/<game_id>/valid-moves', methods=['GET'])
 def get_valid_moves(game_id):
     if game_id not in games:

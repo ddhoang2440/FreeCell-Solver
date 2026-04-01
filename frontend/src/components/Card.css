@@ -1,44 +1,52 @@
 .card {
   position: absolute;
-  background: white;
-  border-radius: 8px;
-  border: 2px solid #333;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  transition:
-    transform 0.1s,
-    box-shadow 0.1s;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1);
+  cursor: grab;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s ease, filter 0.2s ease;
   user-select: none;
+  overflow: hidden;
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.card:active {
+  cursor: grabbing;
 }
 
 .card.red {
-  color: #ff4444;
+  color: #d1111d;
 }
 
 .card.black {
-  color: #333;
+  color: #1a1a1a;
 }
 
 .card-corner {
   position: absolute;
-  font-size: 18px;
-  font-weight: bold;
-  line-height: 1.2;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px;
 }
 
 .card-corner.top-left {
-  top: 5px;
-  left: 5px;
+  top: 0;
+  left: 0;
 }
 
 .card-corner.bottom-right {
-  bottom: 5px;
-  right: 5px;
+  bottom: 0;
+  right: 0;
   transform: rotate(180deg);
 }
 
@@ -47,5 +55,18 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 40px;
+  font-size: 32px;
+  opacity: 0.9;
+}
+
+/* Subtle gloss effect */
+.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
 }

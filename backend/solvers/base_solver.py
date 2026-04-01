@@ -4,10 +4,10 @@ from typing import List, Tuple, Optional, Set
 import time
 import psutil
 import os
-from backend.game_state import FreeCellState
+from game_state import FreeCellState
 
 class BaseSolver(ABC):
-    def __init__(self, initial_state: FreeCellState):
+    def __init__(self, initial_state: FreeCellState, **kwargs):
         self.initial_state = initial_state
         self.solution: List[Tuple] = []
         self.expanded_nodes = 0
@@ -15,18 +15,21 @@ class BaseSolver(ABC):
         self.memory_usage = 0
         self.visited: Set = set()
         
-        self.game_id = None
+        self.game_id = kwargs.get('game_id')
+        self.socketio = kwargs.get('socketio')
+        self.verbose = kwargs.get('verbose', False)
+        self.cancelled = False 
         self.start_time = None
         
     @abstractmethod
     def solve(self) -> Optional[List[Tuple]]:
         pass
     
-    def measure_performance(self) -> dict:
+    def measure_performance(self, **kwargs) -> dict:
         process = psutil.Process(os.getpid())
         start_memory = process.memory_info().rss / 1024 / 1024 
         self.start_time = time.time()
-        solution = self.solve()
+        solution = self.solve(**kwargs)
         end_time = time.time()
         
         end_memory = process.memory_info().rss / 1024 / 1024 

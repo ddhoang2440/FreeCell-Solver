@@ -74,8 +74,10 @@ const Home = () => {
   return (
     <div className="home-container">
       <div className="home-header">
-        <h1 className="home-title">FREE CELL SOLVER</h1>
-        <div className="home-subtitle">Web Edition</div>
+        <h1 className="home-title">
+          <span>FREE CELL</span> SOLVER
+        </h1>
+        <div className="home-subtitle">Premium Web Edition</div>
       </div>
 
       <div className="home-card">
