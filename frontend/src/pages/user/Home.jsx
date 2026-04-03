@@ -73,79 +73,100 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      <div className="home-header">
-        <h1 className="home-title">
-          <span>FREE CELL</span> SOLVER
-        </h1>
-        <div className="home-subtitle">Premium Web Edition</div>
-      </div>
-
-      <div className="home-card">
-        <h2 className="home-card-title">New Game</h2>
-        
-        {/* Toggle Mode */}
-        <div className="game-mode-toggles">
-          <button 
-            className={`mode-btn ${mode === "seed" ? "active" : ""}`}
-            onClick={() => setMode("seed")}
-          >
-            Random Board (By Seed)
-          </button>
-          <button 
-            className={`mode-btn ${mode === "custom" ? "active" : ""}`}
-            onClick={() => setMode("custom")}
-          >
-            Custom Test Boards
-          </button>
+      <div className="home-content">
+        <div className="home-header">
+          <h1 className="home-title">
+            <span>FREE CELL</span> SOLVER
+          </h1>
+          <div className="home-subtitle">Premium Web Edition</div>
         </div>
 
-        {mode === "seed" ? (
-          <div className="input-group">
-            <label htmlFor="seed-input" className="input-label">
-              Seed Number:
-            </label>
-            <input
-              id="seed-input"
-              type="text"
-              className="seed-input"
-              value={seed}
-              onChange={handleSeedChange}
-              placeholder="Enter seed (1-99999)"
-            />
+        <div className="home-card">
+          <h2 className="home-card-title">New Game</h2>
+          
+          {/* Toggle Mode */}
+          <div className="game-mode-toggles">
+            <button 
+              className={`mode-btn ${mode === "seed" ? "active" : ""}`}
+              onClick={() => setMode("seed")}
+            >
+              Random Board
+            </button>
+            <button 
+              className={`mode-btn ${mode === "custom" ? "active" : ""}`}
+              onClick={() => setMode("custom")}
+            >
+              Custom Test Boards
+            </button>
           </div>
-        ) : (
-          <div className="input-group">
-            <label htmlFor="custom-test-select" className="input-label">
-              Select Test Map:
-            </label>
-            {testCases.length === 0 ? (
-              <div className="error-message">Không tìm thấy custom_tests.json.</div>
-            ) : (
-              <select
-                id="custom-test-select"
+
+          {mode === "seed" ? (
+            <div className="input-group">
+              <label htmlFor="seed-input" className="input-label">
+                Seed Number:
+              </label>
+              <input
+                id="seed-input"
+                type="text"
                 className="seed-input"
-                value={selectedTestCase}
-                onChange={(e) => setSelectedTestCase(e.target.value)}
-              >
-                {testCases.map((tc) => (
-                  <option key={tc.id} value={tc.id}>
-                    [{tc.category.toUpperCase()}] #{tc.id} - {tc.description}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-        )}
+                value={seed}
+                onChange={handleSeedChange}
+                placeholder="Enter seed (1-99999)"
+              />
+            </div>
+          ) : (
+            <div className="input-group">
+              <label htmlFor="custom-test-select" className="input-label">
+                Select Test Map:
+              </label>
+              {testCases.length === 0 ? (
+                <div className="error-message">custom_tests.json not found.</div>
+              ) : (
+                <select
+                  id="custom-test-select"
+                  className="seed-input"
+                  value={selectedTestCase}
+                  onChange={(e) => setSelectedTestCase(e.target.value)}
+                >
+                  {testCases.map((tc) => (
+                    <option key={tc.id} value={tc.id}>
+                      [{tc.category.toUpperCase()}] #{tc.id} - {tc.description}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          )}
 
-        {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message">{error}</div>}
 
-        <button
-          className="new-game-button"
-          onClick={handleNewGame}
-          disabled={loading || (mode === "custom" && testCases.length === 0)}
-        >
-          {loading ? <span className="loading-spinner"></span> : "START GAME"}
-        </button>
+          <button
+            className="new-game-button"
+            onClick={handleNewGame}
+            disabled={loading || (mode === "custom" && testCases.length === 0)}
+          >
+            {loading ? <span className="loading-spinner"></span> : "START GAME"}
+          </button>
+
+          <button
+            className="stats-link-button"
+            onClick={() => navigate("/statistics")}
+            style={{
+              marginTop: "1rem",
+              width: "100%",
+              padding: "0.75rem",
+              background: "transparent",
+              border: "1px solid #10b981",
+              color: "#10b981",
+              borderRadius: "0.5rem",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.2s"
+            }}
+          >
+            VIEW ALGORITHM STATISTICS
+          </button>
+        </div>
       </div>
     </div>
   );

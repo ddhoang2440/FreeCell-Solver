@@ -60,11 +60,17 @@ const Game = () => {
   }, []);
 
   const SCREEN_WIDTH = windowSize.width;
-  const SAFE_WIDTH = SCREEN_WIDTH - 20; // Trừ đi 20px padding lề
+  const SAFE_WIDTH = SCREEN_WIDTH - 20; // Subtract 20px for edge padding
 
   const CARD_WIDTH = Math.min(100, Math.floor(SAFE_WIDTH / 8.2));
   const CARD_HEIGHT = Math.floor(CARD_WIDTH * 1.4);
   const CARD_PADDING = Math.floor((SAFE_WIDTH - 8 * CARD_WIDTH) / 9);
+
+  // Use actual board width for coordinate mapping (board may have padding/margin)
+  const getBoardWidth = () => {
+    if (boardRef.current) return boardRef.current.getBoundingClientRect().width;
+    return SCREEN_WIDTH;
+  };
 
   const SCREEN_HEIGHT = windowSize.height - 200;
 
@@ -79,19 +85,25 @@ const Game = () => {
   const CASCADE_SPACING = CARD_WIDTH + CARD_PADDING;
 
   useEffect(() => {
-    // Chỉ chạy timer nếu thông báo không phải là trạng thái đang hoạt động (Ready hoặc Solving)
     if (statusMessage && statusMessage !== "Ready" && !solving && !isAnimating) {
       const timer = setTimeout(() => {
-        setStatusMessage(""); // Xóa thông báo sau 3 giây
+        setStatusMessage("");
       }, 3000);
 
-      return () => clearTimeout(timer); // Xóa timer nếu người dùng thực hiện hành động khác làm thay đổi message
+      return () => clearTimeout(timer);
     }
   }, [statusMessage, solving, isAnimating]);
 
   useEffect(() => {
-    const handleGlobalMouseUp = () => {
+    const handleGlobalMouseUp = (e) => {
       if (dragging) {
+        // If mouse is outside board, still try to handle the drop using last known position
+        if (boardRef.current) {
+          const rect = boardRef.current.getBoundingClientRect();
+          // Only cancel if NOT already handled by the board's onMouseUp
+          // We let the board's handleMouseUp run first (it's a capture phase)
+          // This global handler just ensures state is cleaned up
+        }
         setDragging(false);
         setSelectedCards([]);
         setDragSource(null);
@@ -125,7 +137,6 @@ const Game = () => {
       if (data.game_id === gameId) {
         console.log("solver_progress", data);
 
-        // Dùng callback (prev) để luôn lấy được state mới nhất mà không cần truyền vào mảng phụ thuộc
         setSolverProgress(prev => ({
           progress: data.progress || 0,
           nodesExplored: data.nodes_explored || 0,
@@ -152,9 +163,9 @@ const Game = () => {
 
         const isSolved = data.solution && data.solution.length > 0;
         if (isSolved) {
-          setStatusMessage(`${data.solver} đã tìm thấy giải pháp! (${data.solution.length} bước)`);
+          setStatusMessage(`${data.solver} Solution founded! (${data.solution.length} steps)`);
         } else {
-          setStatusMessage(`${data.solver} không tìm thấy giải pháp trong giới hạn cho phép.`);
+          setStatusMessage(`${data.solver} No solution found within the allowed limits..`);
         }
 
         setSolverProgress(prev => ({
@@ -165,7 +176,7 @@ const Game = () => {
           foundationCards: isSolved ? 52 : (data.results?.foundation_cards || 0),
           freeCellsUsed: isSolved ? 4 : (data.results?.free_cells_used || 0),
           explorationRate: 0,
-          estimatedTime: isSolved ? "Hoàn thành" : "Thất bại",
+          estimatedTime: isSolved ? "Finished" : "Failed",
           solver: data.solver,
         }));
       }
@@ -201,7 +212,6 @@ const Game = () => {
 
   const loadGame = async () => {
     try {
-      // 🟢 THÊM ĐOẠN NÀY ĐỂ RESET TRẠNG THÁI UI
       setSolving(false);
       setSolverResults(null);
       setShowSolverDialog(false);
@@ -355,20 +365,17 @@ const Game = () => {
         const response = await axios.post(`${API_URL}/game/${gameId}/apply_solver_move`, { move: moveArray });
 
         if (response.data.success) {
-          // 🟢 CHÌA KHÓA: Lặp qua từng bước nhỏ mà Backend gửi về
           for (const stepState of response.data.steps) {
             setGameState(stepState);
-            // Tốc độ bay của từng lá bài lẻ (ví dụ 200ms)
             await new Promise(resolve => setTimeout(resolve, 200));
           }
 
           if (response.data.is_goal) {
-            setStatusMessage("🎉 Chiến thắng!");
+            setStatusMessage("🎉 You Win!");
             break;
           }
         }
 
-        // Khoảng nghỉ giữa các quyết định lớn của AI
         await new Promise(resolve => setTimeout(resolve, 100));
       } catch (error) { break; }
     }
@@ -382,53 +389,40 @@ const Game = () => {
     return "bg-green-500";
   };
   const getCascadeOffsetY = (cascadeLength) => {
-    // Tự động điều chỉnh khoảng cách đè thẻ bài dựa trên chiều cao thẻ và số lượng bài
-    // Đảm bảo không vượt quá kích thước màn hình
-    const maxOffset = Math.floor(CARD_HEIGHT / 4);
-    const totalAvailableSpace = Math.max(100, SCREEN_HEIGHT - CASCADE_START_Y - CARD_HEIGHT - 10);
-    return Math.min(maxOffset, Math.floor(totalAvailableSpace / Math.max(1, cascadeLength - 1 + 1)));
+    if (cascadeLength <= 1) return Math.floor(CARD_HEIGHT / 3.5);
+    const minVisibleOffset = 28; // Minimum visibility for symbols
+    const maxOffset = Math.floor(CARD_HEIGHT / 3.5); // Preferred visibility (~40px)
+    const availableSpace = Math.max(100, SCREEN_HEIGHT - CASCADE_START_Y - CARD_HEIGHT - 60);
+    const calculatedOffset = Math.floor(availableSpace / (cascadeLength - 1));
+    return Math.max(minVisibleOffset, Math.min(maxOffset, calculatedOffset));
   };
   const getCardAtPosition = (x, y) => {
     if (!gameState) return null;
 
+    // 1. Check Free Cells (top-left area)
     for (let i = 0; i < 4; i++) {
-      const rect = {
-        x: FREE_CELL_START_X + i * (CARD_WIDTH + CARD_PADDING),
-        y: FREE_CELL_START_Y,
-        width: CARD_WIDTH,
-        height: CARD_HEIGHT,
-      };
-
+      const rectX = FREE_CELL_START_X + i * (CARD_WIDTH + CARD_PADDING);
+      // Extend hit area by half padding on each side to avoid dead zones
       if (
-        x >= rect.x &&
-        x <= rect.x + rect.width &&
-        y >= rect.y &&
-        y <= rect.y + rect.height
+        x >= rectX - CARD_PADDING / 2 &&
+        x <= rectX + CARD_WIDTH + CARD_PADDING / 2 &&
+        y >= FREE_CELL_START_Y &&
+        y <= FREE_CELL_START_Y + CARD_HEIGHT
       ) {
-        const card = gameState.free_cells[i];
-        return {
-          type: "freecell",
-          index: i,
-          card: card,
-        };
+        return { type: "freecell", index: i, card: gameState.free_cells[i] };
       }
     }
 
+    // 2. Check Foundations (top-right area)
     const foundations = ["SPADES", "HEARTS", "CLUBS", "DIAMONDS"];
     for (let i = 0; i < foundations.length; i++) {
       const suit = foundations[i];
-      const rect = {
-        x: FOUNDATION_START_X + i * (CARD_WIDTH + CARD_PADDING),
-        y: FOUNDATION_START_Y,
-        width: CARD_WIDTH,
-        height: CARD_HEIGHT,
-      };
-
+      const rectX = FOUNDATION_START_X + i * (CARD_WIDTH + CARD_PADDING);
       if (
-        x >= rect.x &&
-        x <= rect.x + rect.width &&
-        y >= rect.y &&
-        y <= rect.y + rect.height
+        x >= rectX - CARD_PADDING / 2 &&
+        x <= rectX + CARD_WIDTH + CARD_PADDING / 2 &&
+        y >= FOUNDATION_START_Y &&
+        y <= FOUNDATION_START_Y + CARD_HEIGHT
       ) {
         const pile = gameState.foundations[suit] || [];
         return {
@@ -441,76 +435,44 @@ const Game = () => {
       }
     }
 
+    // 3. Check 8 Cascade columns (main play area)
     for (let i = 0; i < 8; i++) {
       const cascadeX = CASCADE_START_X + i * CASCADE_SPACING;
       const cascade = gameState.cascades[i] || [];
 
-      if (cascade.length === 0) {
-        const rect = {
-          x: cascadeX,
-          y: CASCADE_START_Y,
-          width: CARD_WIDTH,
-          height: CARD_HEIGHT,
-        };
+      // Define hit area wider than card width (includes padding)
+      // Last column (i=7) extends to the right screen edge
+      const rightBuffer = i === 7 ? SCREEN_WIDTH : cascadeX + CARD_WIDTH + CARD_PADDING / 2;
+      const isInColumnX =
+        x >= cascadeX - CARD_PADDING / 2 &&
+        x <= rightBuffer;
 
-        if (
-          x >= rect.x &&
-          x <= rect.x + rect.width &&
-          y >= rect.y &&
-          y <= rect.y + rect.height
-        ) {
-          return {
-            type: "cascade_empty",
-            index: i,
-            card: null,
-          };
+      if (isInColumnX && y >= CASCADE_START_Y) {
+        // EMPTY COLUMN: any drop within the column counts
+        if (cascade.length === 0) {
+          return { type: "cascade_empty", index: i, card: null };
         }
-      } else {
+
+        // NON-EMPTY COLUMN: scan from bottom up to find which card was targeted
         for (let j = cascade.length - 1; j >= 0; j--) {
           const offsetY = getCascadeOffsetY(cascade.length);
           const cardY = CASCADE_START_Y + j * offsetY;
 
-          const rect = {
-            x: cascadeX,
-            y: cardY,
-            width: CARD_WIDTH,
-            height: CARD_HEIGHT,
-          };
-
-          if (
-            x >= rect.x &&
-            x <= rect.x + rect.width &&
-            y >= rect.y &&
-            y <= rect.y + rect.height
-          ) {
-            return {
-              type: "cascade",
-              index: i,
-              row: j,
-              card: cascade[j],
-            };
+          // If y is within this card (or in the overlap zone below it)
+          if (y >= cardY && y <= cardY + (j === cascade.length - 1 ? CARD_HEIGHT : offsetY)) {
+            return { type: "cascade", index: i, row: j, card: cascade[j] };
           }
         }
 
+        // BOTTOM DROP ZONE: dropping below the last card still counts as this column
         const currentOffsetY = getCascadeOffsetY(cascade.length);
-        const lastCardY =
-          CASCADE_START_Y + (cascade.length - 1) * currentOffsetY;
-        const dropZoneY = lastCardY + CARD_HEIGHT;
-
-        if (
-          y >= dropZoneY &&
-          y <= dropZoneY + 50 &&
-          x >= cascadeX &&
-          x <= cascadeX + CARD_WIDTH
-        ) {
-          return {
-            type: "cascade_empty",
-            index: i,
-            card: null,
-          };
+        const lastCardY = CASCADE_START_Y + (cascade.length - 1) * currentOffsetY;
+        if (y > lastCardY) {
+          return { type: "cascade_empty", index: i, card: null };
         }
       }
     }
+
     return null;
   };
   const getSequenceFromCascade = (colIndex, startRow) => {
@@ -537,7 +499,7 @@ const Game = () => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Lưu thông tin để kiểm tra click
+    // Save position/time to distinguish a click vs a drag
     setMouseDownTime(Date.now());
     setMouseDownPos({ x: e.clientX, y: e.clientY });
 
@@ -569,7 +531,7 @@ const Game = () => {
             row: clicked.row,
             length: sequence.length,
           });
-          setStatusMessage(`Dragging sequence of ${sequence.length} cards`);
+          // status message intentionally omitted during drag start
         } else {
           setStatusMessage(
             `Can not drag ${sequence.length} cards. Max: ${maxSequenceLength}`,
@@ -582,7 +544,7 @@ const Game = () => {
           index: clicked.index,
           row: clicked.row,
         });
-        setStatusMessage(`Dragging 1 card`);
+        // status message intentionally omitted during drag start
       } else {
         setStatusMessage("Cannot drag this card");
         return;
@@ -593,10 +555,9 @@ const Game = () => {
         type: "freecell",
         index: clicked.index,
       });
-      setStatusMessage(`Dragging from freecell`);
     } else if (clicked.type === "foundation") {
-      // Thêm drag từ foundation
-      // Chỉ cho phép drag card cuối cùng của foundation pile
+      // Allow dragging from foundation
+      // Only the top card of the foundation pile can be dragged
       const foundationPile = gameState.foundations[clicked.card.suit];
       if (
         foundationPile &&
@@ -607,27 +568,19 @@ const Game = () => {
         setSelectedCards([clicked.card]);
         setDragSource({
           type: "foundation",
-          index: clicked.index, // index là suit index
+          index: clicked.index, // index is the suit index
           suit: clicked.card.suit,
         });
-        setStatusMessage(
-          `Dragging from foundation: ${clicked.card.rank} of ${clicked.card.suit}`,
-        );
+          // status message intentionally omitted during drag start
       } else {
         setStatusMessage("Cannot drag this card from foundation");
         return;
       }
     }
 
-    const cardRect = getCardRect(clicked);
-    if (cardRect) {
-      setDragPosition({
-        x: x - cardRect.x,
-        y: y - cardRect.y,
-      });
-    } else {
-      setDragPosition({ x: CARD_WIDTH / 2, y: CARD_HEIGHT / 2 });
-    }
+    // Set dragPosition to the absolute mouse position on the board
+    // The ghost card is centered on the cursor via (-CARD_WIDTH/2) in the render
+    setDragPosition({ x, y });
 
     setDragging(true);
   };
@@ -673,7 +626,7 @@ const Game = () => {
         height: CARD_HEIGHT,
       };
     } else if (clicked.type === "foundation") {
-      // Thêm foundation rect
+      // Foundation card hit rect
       const suitIndex = ["SPADES", "HEARTS", "CLUBS", "DIAMONDS"].indexOf(
         clicked.suit,
       );
@@ -708,25 +661,25 @@ const Game = () => {
 
   const handleMouseUp = (e) => {
     if (!dragging || !dragSource || !boardRef.current) return;
-    // 1. Tính quãng đường và thời gian chuột đã di chuyển
+    // 1. Calculate mouse travel distance and elapsed time
     const moveDist = Math.sqrt(
       Math.pow(e.clientX - mouseDownPos.x, 2) +
       Math.pow(e.clientY - mouseDownPos.y, 2)
     );
     const duration = Date.now() - mouseDownTime;
 
-    // 2. KIỂM TRA CLICK THÔNG MINH (Nếu di chuyển ít và nhanh)
+    // 2. SMART CLICK: small movement + fast release = auto-place
     if (moveDist < 10 && duration < 300) {
-      handleSmartMove(dragSource); // Tự tìm chỗ bay tới
+      handleSmartMove(dragSource); // Auto-find best destination
 
-      // Reset trạng thái kéo bài
+      // Reset drag state
       setDragging(false);
       setSelectedCards([]);
       setDragSource(null);
       return;
     }
 
-    // 3. LOGIC THẢ BÀI (DROP) HIỆN TẠI (Giữ nguyên phần xử lý move = null...)
+    // 3. DRAG-AND-DROP LOGIC
     const rect = boardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -743,7 +696,7 @@ const Game = () => {
     if (target && selectedCards.length > 0) {
       let move = null;
 
-      // Xử lý drag từ foundation
+      // Handle drag from foundation
       if (dragSource.type === "foundation") {
         if (selectedCards.length === 1) {
           if (target.type === "cascade" || target.type === "cascade_empty") {
@@ -756,18 +709,18 @@ const Game = () => {
               move = ["foundation_to_freecell", dragSource.suit, target.index];
               console.log(`Moving from foundation to freecell ${target.index}`);
             } else {
-              setStatusMessage("❌ Free cell is not empty");
+              setStatusMessage("Free cell is not empty");
             }
           } else {
             setStatusMessage(
-              "❌ Can only drop foundation cards to cascade or freecell",
+              "Can only drop foundation cards to cascade or freecell",
             );
           }
         } else {
-          setStatusMessage("❌ Can only drag single card from foundation");
+          setStatusMessage("Can only drag single card from foundation");
         }
       }
-      // Xử lý drag từ cascade_sequence
+      // Handle drag from cascade_sequence
       else if (dragSource.type === "cascade_sequence") {
         if (target.type === "cascade" || target.type === "cascade_empty") {
           if (dragSource.index !== target.index) {
@@ -799,7 +752,7 @@ const Game = () => {
           setStatusMessage("Sequence can only be dropped to cascade");
         }
       }
-      // Xử lý drag từ cascade
+      // Handle drag from cascade
       else if (dragSource.type === "cascade") {
         if (selectedCards.length === 1) {
           if (target.type === "cascade" || target.type === "cascade_empty") {
@@ -815,7 +768,7 @@ const Game = () => {
           }
         }
       }
-      // Xử lý drag từ freecell
+      // Handle drag from freecell
       else if (dragSource.type === "freecell") {
         if (target.type === "cascade" || target.type === "cascade_empty") {
           move = ["freecell_to_cascade", dragSource.index, target.index];
@@ -835,10 +788,10 @@ const Game = () => {
         console.log("Sending move:", move);
         makeMove(move);
       } else {
-        setStatusMessage("❌ Invalid move");
+        setStatusMessage("Invalid move");
       }
     } else {
-      setStatusMessage("❌ Invalid drop target");
+      setStatusMessage("Invalid drop target");
     }
 
     setDragging(false);
@@ -849,12 +802,48 @@ const Game = () => {
   const handleSmartMove = async (source) => {
     if (!gameState || selectedCards.length === 0) return;
 
-    // Quy tắc 1: Chỉ quân bài cuối cùng (playable card) mới được click-to-move
     const card = selectedCards[0];
     let bestMove = null;
 
-    // --- ƯU TIÊN 1: Lên Foundation (Móng) ---
-    // "Nếu một quân Át có thể chơi, bạn có thể di chuyển nó ngay lập tức vào móng"
+    // --- SEQUENCE: dragging multiple cards, only find a valid cascade ---
+    if (source.type === "cascade_sequence") {
+      const maxSequenceLength = gameState?.max_sequence_length;
+      if (selectedCards.length > maxSequenceLength) {
+        setStatusMessage(`Cannot move ${selectedCards.length} cards. Max: ${maxSequenceLength}`);
+        return;
+      }
+
+      // Priority 1: cascade with a matching top card
+      for (let i = 0; i < 8; i++) {
+        if (source.index === i) continue;
+        const destCascade = gameState.cascades[i];
+        if (destCascade.length > 0) {
+          const topCard = destCascade[destCascade.length - 1];
+          if (canPlaceOn(card, topCard)) {
+            bestMove = ["cascade_to_cascade_sequence", source.index, i, selectedCards.length];
+            break;
+          }
+        }
+      }
+
+      // Priority 2: empty column
+      if (!bestMove) {
+        const emptyCascadeIdx = gameState.cascades.findIndex(c => c.length === 0);
+        if (emptyCascadeIdx !== -1 && source.index !== emptyCascadeIdx) {
+          bestMove = ["cascade_to_cascade_sequence", source.index, emptyCascadeIdx, selectedCards.length];
+        }
+      }
+
+      if (bestMove) {
+        makeMove(bestMove);
+      } else {
+        setStatusMessage("No valid destination for this sequence");
+      }
+      return;
+    }
+
+    // --- SINGLE CARD ---
+    // Priority 1: move to Foundation
     const suit = card.suit;
     const pile = gameState.foundations[suit] || [];
     const isNextRank = (pile.length === 0 && card.rank === 1) ||
@@ -864,8 +853,7 @@ const Game = () => {
       bestMove = [source.type.includes("freecell") ? "freecell_to_foundation" : "cascade_to_foundation", source.index];
     }
 
-    // --- ƯU TIÊN 2: Xếp vào Tableau (Cột bài) đang có bài ---
-    // "Khác màu và thấp hơn một bậc" (VD: 3 Cơ lên 4 Bích)
+    // Priority 2: stack onto a tableau cascade
     if (!bestMove) {
       for (let i = 0; i < 8; i++) {
         if (source.type === "cascade" && source.index === i) continue;
@@ -880,12 +868,10 @@ const Game = () => {
       }
     }
 
-    // --- ƯU TIÊN 3: Di chuyển vào Cột trống (Empty Column) ---
-    // "Nếu bạn dọn sạch một cột, bạn có thể lấy bất kỳ quân bài tự do nào và chuyển nó vào"
+    // Priority 3: empty column
     if (!bestMove) {
       const emptyCascadeIdx = gameState.cascades.findIndex(c => c.length === 0);
       if (emptyCascadeIdx !== -1) {
-        // Chỉ chuyển vào cột trống nếu quân bài đó không phải đang đứng một mình ở một cột trống khác
         const isCardAloneInCascade = source.type === "cascade" && gameState.cascades[source.index].length === 1;
         if (!isCardAloneInCascade) {
           bestMove = [source.type.includes("freecell") ? "freecell_to_cascade" : "cascade_to_cascade", source.index, emptyCascadeIdx];
@@ -893,8 +879,8 @@ const Game = () => {
       }
     }
 
-    // --- ƯU TIÊN 4: Cất vào Free Cell (Ô tạm) ---
-    // "Bạn có thể di chuyển bất kỳ quân bài nào vào một trong bốn ô tạm"
+    // Priority 4: Free Cell
+    // "You can move any card into one of the four free cells"
     if (!bestMove && source.type !== "freecell") {
       const emptyFreeCellIdx = gameState.free_cells.findIndex(cell => cell === null);
       if (emptyFreeCellIdx !== -1) {
@@ -906,7 +892,7 @@ const Game = () => {
     if (bestMove) {
       makeMove(bestMove);
     } else {
-      setStatusMessage("❌ Không có nước đi hợp lệ theo luật!");
+      setStatusMessage("No solution found within the allowed limits.");
     }
   };
   // const handleMouseUp = (e) => {
@@ -1057,6 +1043,76 @@ const Game = () => {
     position: "relative",
   };
 
+  // --- PREPARE FLAT CARD LIST FOR ANIMATION ---
+  const cardsToRender = [];
+  if (gameState) {
+    // 1. Free Cells
+    gameState.free_cells.forEach((card, i) => {
+      if (card) {
+        const x = FREE_CELL_START_X + i * (CARD_WIDTH + CARD_PADDING);
+        const y = FREE_CELL_START_Y;
+        const isDragged = dragging && dragSource?.type === "freecell" && dragSource?.index === i;
+        cardsToRender.push({
+          card, x, y,
+          zIndex: isDragged ? 100 : 10,
+          isDragged,
+          key: `card-${card.suit}-${card.rank}`,
+          type: 'freecell',
+          index: i
+        });
+      }
+    });
+
+    // 2. Foundations - use FIXED order to prevent suitIndex shuffling between renders
+    const SUIT_ORDER = ["SPADES", "HEARTS", "CLUBS", "DIAMONDS"];
+    SUIT_ORDER.forEach((suit, suitIndex) => {
+      const pile = gameState.foundations[suit] || [];
+      pile.forEach((card, rowIndex) => {
+        const x = FOUNDATION_START_X + suitIndex * (CARD_WIDTH + CARD_PADDING);
+        const y = FOUNDATION_START_Y;
+        cardsToRender.push({
+          card, x, y,
+          zIndex: rowIndex + 1,
+          isDragged: false,
+          key: `card-${card.suit}-${card.rank}`,
+          type: 'foundation',
+          suitIndex
+        });
+      });
+    });
+
+    // 3. Cascades
+    gameState.cascades.forEach((cascade, colIndex) => {
+      const x = CASCADE_START_X + colIndex * CASCADE_SPACING;
+      const offsetY = getCascadeOffsetY(cascade.length);
+      cascade.forEach((card, rowIndex) => {
+        const y = CASCADE_START_Y + rowIndex * offsetY;
+        const isDragged = dragging && dragSource?.type === "cascade" && dragSource?.index === colIndex && dragSource?.row === rowIndex;
+        // Check if this card is part of a dragged sequence
+        const isInDraggedSequence = dragging && 
+          (dragSource?.type === "cascade_sequence" || dragSource?.type === "cascade") && 
+          dragSource?.index === colIndex && 
+          rowIndex >= dragSource?.row;
+        
+        const isLastCard = rowIndex === cascade.length - 1;
+        const canDragSequence = cascade.length > 1;
+
+        cardsToRender.push({
+          card, x, y,
+          zIndex: isDragged ? 1000 : rowIndex + 1,
+          isDragged,
+          isInDraggedSequence,
+          isLastCard,
+          canDragSequence,
+          key: `card-${card.suit}-${card.rank}`,
+          type: 'cascade',
+          colIndex,
+          rowIndex
+        });
+      });
+    });
+  }
+
   return (
     <div className="min-h-screen relative font-sans overflow-hidden">
       <div className="w-full bg-black/20 backdrop-blur-md border-b border-white/10 p-4 sticky top-0 z-50">
@@ -1194,16 +1250,11 @@ const Game = () => {
       )}
       <div
         ref={boardRef}
-        className="max-w-7xl mx-auto relative mt-16 cursor-default select-none"
-        style={{ ...gameContainerStyle, height: SCREEN_HEIGHT + 350 }}
+        className="w-full relative mt-16 cursor-default select-none"
+        style={{ ...gameContainerStyle, width: SCREEN_WIDTH, height: SCREEN_HEIGHT + 350 }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={() => {
-          setDragging(false);
-          setSelectedCards([]);
-          setDragSource(null);
-        }}
       >
         <div
           className="absolute"
@@ -1214,15 +1265,11 @@ const Game = () => {
           </div>
         </div>
         {[0, 1, 2, 3].map((i) => {
-          const card = gameState?.free_cells[i];
-          const isEmpty = !card;
           const x = FREE_CELL_START_X + i * (CARD_WIDTH + CARD_PADDING);
           return (
             <div
-              key={`freecell-${i}`}
-              className={`absolute freecell-card slot-container flex items-center justify-center
-      ${!isEmpty && !dragging ? "hover:scale-105 hover:shadow-xl cursor-grab" : ""}
-      ${dragging && dragSource?.type === "freecell" && dragSource?.index === i ? "opacity-30" : ""}`}
+              key={`freecell-slot-${i}`}
+              className="absolute slot-container flex items-center justify-center"
               style={{
                 left: x,
                 top: FREE_CELL_START_Y,
@@ -1231,15 +1278,7 @@ const Game = () => {
               }}
               data-type="freecell"
               data-index={i}
-            >
-              {card ? (
-                <div className="w-full h-full flex items-center justify-center">
-                  {renderCard(card)}
-                </div>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center" />
-              )}
-            </div>
+            />
           );
         })}
         <div
@@ -1251,13 +1290,11 @@ const Game = () => {
           </div>
         </div>
         {["SPADES", "HEARTS", "CLUBS", "DIAMONDS"].map((suit, i) => {
-          const pile = gameState?.foundations[suit] || [];
-          const isEmpty = pile.length === 0;
           const x = FOUNDATION_START_X + i * (CARD_WIDTH + CARD_PADDING);
           return (
             <div
-              key={`foundation-${suit}`}
-              className={`absolute foundation-card slot-container flex items-center justify-center`}
+              key={`foundation-slot-${suit}`}
+              className="absolute foundation-card slot-container flex items-center justify-center"
               style={{
                 left: x,
                 top: FOUNDATION_START_Y,
@@ -1268,25 +1305,18 @@ const Game = () => {
               data-index={i}
               data-suit={suit}
             >
-              {!isEmpty ? (
-                <div className="w-full h-full flex items-center justify-center">
-                  {renderCard(pile[pile.length - 1])}
-                </div>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-5xl text-yellow-500/30 font-bold">
-                  {suit === "SPADES" && "♠"}
-                  {suit === "HEARTS" && "♥"}
-                  {suit === "CLUBS" && "♣"}
-                  {suit === "DIAMONDS" && "♦"}
-                </div>
-              )}
+              <div className="w-full h-full flex items-center justify-center text-5xl text-yellow-500/30 font-bold">
+                {suit === "SPADES" && "♠"}
+                {suit === "HEARTS" && "♥"}
+                {suit === "CLUBS" && "♣"}
+                {suit === "DIAMONDS" && "♦"}
+              </div>
             </div>
           );
         })}
 
         {gameState?.cascades.map((cascade, colIndex) => {
           const isEmpty = cascade.length === 0;
-          const canDragSequence = cascade.length > 1;
           const x = CASCADE_START_X + colIndex * CASCADE_SPACING;
 
           return (
@@ -1309,58 +1339,41 @@ const Game = () => {
                 data-type="cascade"
                 data-index={colIndex}
                 data-empty={isEmpty}
-              >
-                {cascade.map((card, rowIndex) => {
-                  const offsetY = getCascadeOffsetY(cascade.length);
-                  const y = rowIndex * offsetY;
-                  const isLastCard = rowIndex === cascade.length - 1;
-                  const isDragged =
-                    dragging &&
-                    dragSource?.type === "cascade" &&
-                    dragSource?.index === colIndex &&
-                    dragSource?.row === rowIndex;
-                  const isInDraggedSequence =
-                    dragging &&
-                    dragSource?.type === "cascade" &&
-                    dragSource?.index === colIndex &&
-                    rowIndex >= dragSource?.row;
+              />
+            </div>
+          );
+        })}
 
-                  return (
-                    <div
-                      key={`cascade-card-${card.suit}-${card.rank}`}
-                      className={`absolute cascade-card left-0 transition-all ${!dragging && !isLastCard ? "hover:z-20" : ""} ${isInDraggedSequence && !isDragged ? "opacity-50" : ""}`}
-                      style={{
-                        top: y,
-                        width: CARD_WIDTH,
-                        height: CARD_HEIGHT,
-                        zIndex: isDragged ? 30 : isLastCard ? 20 : rowIndex + 1,
-                        cursor:
-                          !dragging && (isLastCard || canDragSequence)
-                            ? "grab"
-                            : "default",
-                      }}
-                      data-type="cascade-card"
-                      data-col={colIndex}
-                      data-row={rowIndex}
-                      data-card={JSON.stringify(card)}
-                    >
-                      <div
-                        className={`relative w-full h-full transition-all duration-200 ${!dragging && (isLastCard || canDragSequence) ? "hover:scale-105 hover:-translate-y-1" : ""}`}
-                      >
-                        <Card
-                          suit={card.suit}
-                          rank={card.rank}
-                          width={CARD_WIDTH}
-                          height={CARD_HEIGHT}
-                          isDragged={isDragged}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-                {isEmpty && !dragging && (
-                  <div className="absolute inset-0 flex items-center justify-center" />
-                )}
+        {/* FLAT CARDS LAYER FOR ANIMATION */}
+        {cardsToRender.map((item) => {
+          const { card, x, y, zIndex, isDragged, isInDraggedSequence, isLastCard, canDragSequence, key, type } = item;
+          // Only cascade cards get position transitions; foundation/freecell stay fixed
+          const positionTransition = type === 'cascade' ? 'transition-all duration-400 ease-out' : 'transition-opacity duration-200';
+          return (
+            <div
+              key={key}
+              className={`absolute ${positionTransition}
+                ${isInDraggedSequence ? "opacity-30 pointer-events-none" : ""} 
+                ${isDragged ? "invisible" : ""}`}
+              style={{
+                left: x,
+                top: y,
+                width: CARD_WIDTH,
+                height: CARD_HEIGHT,
+                zIndex: zIndex,
+              }}
+            >
+              <div
+                className={`relative w-full h-full transition-all duration-200 
+                  ${!dragging && (isLastCard || canDragSequence || type !== 'cascade') ? "hover:scale-105 hover:-translate-y-1 hover:z-50" : ""}`}
+              >
+                <Card
+                  suit={card.suit}
+                  rank={card.rank}
+                  width={CARD_WIDTH}
+                  height={CARD_HEIGHT}
+                  isDragged={isDragged}
+                />
               </div>
             </div>
           );
@@ -1373,7 +1386,7 @@ const Game = () => {
                 className="absolute pointer-events-none z-50 transition-transform"
                 style={{
                   left: dragPosition.x - CARD_WIDTH / 2,
-                  top: dragPosition.y - CARD_HEIGHT / 2 + i * 15,
+                  top: dragPosition.y - CARD_HEIGHT / 2 + i * 20,
                   transform: `rotate(${i * 2}deg) scale(1.05)`,
                   filter: "drop-shadow(0 20px 25px rgba(0, 0, 0, 0.5))",
                   opacity: 0.95,
@@ -1453,7 +1466,7 @@ const Game = () => {
       </div>
 
       {statusMessage && (
-        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 bg-amber-500 text-black px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest shadow-heavy border-2 border-black/20 backdrop-blur-md animate-[slideUp_0.3s_ease] z-50">
+        <div className="fixed bottom-6 right-6 bg-black/80 text-amber-400 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-widest shadow-2xl border border-amber-500/30 backdrop-blur-md z-50 max-w-xs text-right animate-[slideInRight_0.3s_ease]">
           {statusMessage}
         </div>
       )}
@@ -1487,7 +1500,8 @@ const Game = () => {
                   <div>
                     <div className="section-label mb-1">Solution</div>
                     <div className={`text-xl font-black ${solverResults.results?.solution_found ? "text-emerald-400" : "text-rose-400"}`}>
-                      {solverResults.results?.solution_found ? "FOUND" : "NOT FOUND"}
+                      {!solverResults.results?.solution_found ? "NOT FOUND" : 
+                       (solverResults.results?.solution_length === 0 ? "SOLVED" : "FOUND")}
                     </div>
                   </div>
                 </div>
@@ -1515,12 +1529,12 @@ const Game = () => {
                 <div className="bg-black/20 rounded-xl p-4 border border-white/5">
                   <div className="section-label mb-1 text-[10px]">Steps</div>
                   <div className="text-xl font-bold text-white tracking-tight">
-                    {solverResults.results?.solution_length}
+                    {solverResults.results?.solution_found && solverResults.results?.solution_length === 0 ? "-" : solverResults.results?.solution_length}
                   </div>
                 </div>
               </div>
 
-              {solverResults.results?.solution_found && (
+              {solverResults.results?.solution_found && solverResults.results?.solution_length > 0 && (
                 <button
                   onClick={handleApplySolution}
                   className="btn-modern btn-accent w-full py-4 text-sm mt-4 shadow-lg active:translate-y-1"

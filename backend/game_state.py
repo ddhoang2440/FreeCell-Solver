@@ -60,8 +60,8 @@ class FreeCellState:
                     free_ids.append(cell.id)
                 else:
                     free_ids.append(-1)
-            free_cells_tuple = tuple(free_ids)
-            # free_cells_tuple = tuple(sorted(free_ids))
+            # free_cells_tuple = tuple(free_ids)
+            free_cells_tuple = tuple(sorted(free_ids))
             
             foundations_parts = []
             for suit in [Suit.SPADES, Suit.HEARTS, Suit.CLUBS, Suit.DIAMONDS]:

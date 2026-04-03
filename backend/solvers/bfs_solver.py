@@ -53,6 +53,7 @@ class BFSSolver(BaseSolver):
         
         # Kiểm tra nếu bàn cờ đã thắng ngay từ đầu
         if self.initial_state.is_goal():
+            self.solution = []
             return []
             
         # Trạng thái ban đầu: Không có cha, không có nước đi dẫn đến nó

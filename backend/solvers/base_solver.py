@@ -2,8 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Optional, Set
 import time
-import psutil
-import os
+import tracemalloc
 from game_state import FreeCellState
 
 class BaseSolver(ABC):
@@ -26,17 +25,18 @@ class BaseSolver(ABC):
         pass
     
     def measure_performance(self, **kwargs) -> dict:
-        process = psutil.Process(os.getpid())
-        start_memory = process.memory_info().rss / 1024 / 1024 
+        tracemalloc.start()
         self.start_time = time.time()
         solution = self.solve(**kwargs)
         end_time = time.time()
-        
-        end_memory = process.memory_info().rss / 1024 / 1024 
-        
+
+        # Lấy peak memory (lượng bộ nhớ cao nhất trong suốt quá trình chạy)
+        _, peak_traced = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+
         self.search_time = end_time - self.start_time
-        self.memory_usage = end_memory - start_memory
-        
+        self.memory_usage = peak_traced / 1024 / 1024  # Bytes -> MB
+
         return {
             'expanded_nodes': self.expanded_nodes,
             'search_time': self.search_time,

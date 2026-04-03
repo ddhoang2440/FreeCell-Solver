@@ -27,26 +27,26 @@
     },
     {
       "id": "easy-02",
-      "origin_seed": 25904,
+      "origin_seed": 13464,
       "category": "easy",
       "description": "3 moves to win.",
       "state_data": {
         "cascades": [
-          ["KS", "QH", "JH", "10D"],
-          ["KH"],
-          ["10S", "9C", "10C", "JC", "10H"],
-          ["JH", "KC", "QD"],
-          ["QC"],
           [],
-          ["KD", "QS", "JD"],
-          []
+          [],
+          ["QH"],
+          ["KS", "10H", "KC", "QD", "QC", "JC"],
+          ["KH", "QS", "JH"],
+          ["JS"],
+          [],
+          ["KD"]
         ],
         "free_cells": [null, null, null, null],
         "foundations": {
-          "SPADES": 9,
+          "SPADES": 10,
           "HEARTS": 9,
-          "CLUBS": 8,
-          "DIAMONDS": 9
+          "CLUBS": 10,
+          "DIAMONDS": 11
         }
       }
     },

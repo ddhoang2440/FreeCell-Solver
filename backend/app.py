@@ -178,62 +178,109 @@ def make_move(game_id):
     
     data = request.get_json()
     move = data.get('move')
-    
     if not move:
         return jsonify({'success': False, 'error': 'No move provided'}), 400
     
     game = games[game_id]
     state = game['state']
-    
     move_tuple = tuple(move)
-    # all_moves = state.get_all_moves(True)
-    
-    # # KIỂM TRA 1: Nước đi có nằm trong danh sách hợp lệ không?
-    # if move_tuple not in all_moves:
-    #     print(f"Từ chối: Nước đi {move_tuple} không có trong danh sách hợp lệ.")
-    #     print(f"Gợi ý: Do game_state chỉ cho phép ném bài vào ô trống ĐẦU TIÊN (first_empty_free).")
-    #     return jsonify({'success': False, 'error': 'Invalid move'}), 400
     
     try:
         new_state = state.apply_move(move_tuple)
         
-        # KIỂM TRA 2: Chặn lỗi văng (500) nếu apply_move trả về None
         if new_state is None:
             return jsonify({
-                'success': True, 
-                'state': state_to_dict(state), 
-                'message': 'Move rejected by rules'
-            })
+                'success': False, 
+                'error': 'Nước đi không hợp lệ! (Kiểm tra quy tắc khác màu, giảm dần)',
+                'state': state_to_dict(state) 
+            }), 400
             
-        # Cập nhật thành công
+        # if hasattr(new_state, 'auto_move_to_foundation'):
+        #     new_state.auto_move_to_foundation()
+            
         games[game_id]['state'] = new_state
         games[game_id]['move_count'] += 1
         
         is_goal = new_state.is_goal()
-        
         socketio.emit('state_update', {
             'game_id': game_id,
             'state': state_to_dict(new_state),
             'last_move': move
         })
         
-        response = {
+        return jsonify({
             'success': True,
             'state': state_to_dict(new_state),
             'is_goal': is_goal
-        }
-        
-        if is_goal:
-            response['message'] = 'Congratulations! You won!'
-        
-        return jsonify(response)
+        })
         
     except Exception as e:
-        # KIỂM TRA 3: Bắt tận tay nếu code bị sập ở đâu đó
         import traceback
-        print("CRITICAL ERROR trong lúc di chuyển:")
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
+# @app.route('/api/game/<game_id>/move', methods=['POST'])
+# def make_move(game_id):
+#     if game_id not in games:
+#         return jsonify({'success': False, 'error': 'Game not found'}), 404
+    
+#     data = request.get_json()
+#     move = data.get('move')
+    
+#     if not move:
+#         return jsonify({'success': False, 'error': 'No move provided'}), 400
+    
+#     game = games[game_id]
+#     state = game['state']
+    
+#     move_tuple = tuple(move)
+#     # all_moves = state.get_all_moves(True)
+    
+#     # # KIỂM TRA 1: Nước đi có nằm trong danh sách hợp lệ không?
+#     # if move_tuple not in all_moves:
+#     #     print(f"Từ chối: Nước đi {move_tuple} không có trong danh sách hợp lệ.")
+#     #     print(f"Gợi ý: Do game_state chỉ cho phép ném bài vào ô trống ĐẦU TIÊN (first_empty_free).")
+#     #     return jsonify({'success': False, 'error': 'Invalid move'}), 400
+    
+#     try:
+#         new_state = state.apply_move(move_tuple)
+        
+#         # KIỂM TRA 2: Chặn lỗi văng (500) nếu apply_move trả về None
+#         if new_state is None:
+#             return jsonify({
+#                 'success': True, 
+#                 'state': state_to_dict(state), 
+#                 'message': 'Move rejected by rules'
+#             })
+            
+#         # Cập nhật thành công
+#         games[game_id]['state'] = new_state
+#         games[game_id]['move_count'] += 1
+        
+#         is_goal = new_state.is_goal()
+        
+#         socketio.emit('state_update', {
+#             'game_id': game_id,
+#             'state': state_to_dict(new_state),
+#             'last_move': move
+#         })
+        
+#         response = {
+#             'success': True,
+#             'state': state_to_dict(new_state),
+#             'is_goal': is_goal
+#         }
+        
+#         if is_goal:
+#             response['message'] = 'Congratulations! You won!'
+        
+#         return jsonify(response)
+        
+#     except Exception as e:
+#         # KIỂM TRA 3: Bắt tận tay nếu code bị sập ở đâu đó
+#         import traceback
+#         print("CRITICAL ERROR trong lúc di chuyển:")
+#         traceback.print_exc()
+#         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/game/<game_id>/restart', methods=['POST'])
 def restart_game(game_id):
@@ -447,11 +494,15 @@ def solve_game(game_id):
             # ĐƯA VÀO DANH SÁCH ĐANG CHẠY
             active_solvers[game_id] = solver
 
-            results = solver.measure_performance(node_limit = 200000)
-            
-            # 1. Lấy đường đi cơ bản (chưa có auto-moves)
-            explicit_path = getattr(solver, 'solution', [])
-            is_solved = bool(explicit_path)
+            # Kiểm tra xem bàn cờ đã thắng chưa NGAY LẬP TỨC
+            if state.is_goal():
+                is_solved = True
+                explicit_path = []
+            else:
+                results = solver.measure_performance(node_limit = 2000000)
+                # Dựa vào kết quả trả về của solve() chứ không dùng bool(path) vì path có thể rỗng (nếu đã thắng)
+                is_solved = results.get('found_solution', False)
+                explicit_path = getattr(solver, 'solution', [])
             
             # 2. MÔ PHỎNG LẠI ĐỂ LẤY FULL ĐƯỜNG ĐI (Gồm cả Auto-moves)
             full_solution = []
@@ -460,10 +511,11 @@ def solve_game(game_id):
                 import copy
                 replay_state = copy.deepcopy(solver.initial_state)
 
+                # CHÚ Ý: Lấy độ dài lịch sử TRƯỚC KHI dọn móng để bao gồm các nước auto-move đầu tiên vào solution
+                old_history_len = len(getattr(replay_state, 'move_history', []))
+
                 if hasattr(replay_state, 'auto_move_to_foundation'):
                     replay_state.auto_move_to_foundation()
-
-                old_history_len = len(getattr(replay_state, 'move_history', []))                # Ép AI đánh lại từ đầu để nhả ra các bước auto-move
                 for move in explicit_path:
                     if replay_state is None:
                         break
@@ -571,6 +623,143 @@ def get_valid_moves(game_id):
         'moves': moves_list,
         'count': len(moves_list)
     })
+
+@app.route('/api/statistics', methods=['GET'])
+def get_statistics():
+    """Aggregates all benchmark results from the tests/results/ directory."""
+    # current_dir should be FreeCell-Solver/backend
+    results_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tests', 'results')
+    if not os.path.exists(results_dir):
+        # Try parent dir just in case
+        results_dir = os.path.join(os.getcwd(), 'backend', 'tests', 'results')
+        if not os.path.exists(results_dir):
+            return jsonify({'success': False, 'error': f'No results directory found at {results_dir}'}), 404
+
+    all_data = []
+    for filename in sorted(os.listdir(results_dir), reverse=True):
+        if filename.startswith('run_') and filename.endswith('.json'):
+            file_path = os.path.join(results_dir, filename)
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    all_data.append(data)
+                if len(all_data) >= 10: # Only look at last 10 runs for stats
+                    break
+            except Exception as e:
+                print(f"Error reading {filename}: {e}")
+
+    if not all_data:
+        return jsonify({'success': False, 'error': 'No data found'}), 404
+
+    try:
+        # Aggregate stats
+        stats = {} 
+        recent_matches = []
+        
+        for run in all_data:
+            run_timestamp = run.get('timestamp', 'Unknown')
+            # Handle potential null for timeout_seconds
+            timeout_val = run.get('timeout_seconds')
+            if timeout_val is None:
+                timeout_val = 60
+                
+            for t_case in run.get('runs', []):
+                category = t_case.get('category', 'unknown')
+                t_id = t_case.get('test_case_id', 'unknown')
+                for res in t_case.get('results', []):
+                    solver = res.get('solver', 'unknown')
+                    status = res.get('status', 'unknown')
+                    
+                    # For History Table
+                    s_time = res.get('search_time')
+                    recent_matches.append({
+                        'timestamp': run_timestamp,
+                        'seed': t_id,
+                        'solver': solver,
+                        'status': status,
+                        'category': category,
+                        'solution_length': res.get('solution_length'),
+                        'search_time': round(float(s_time), 3) if s_time is not None else None
+                    })
+
+                    if solver not in stats:
+                        stats[solver] = {}
+                    if category not in stats[solver]:
+                        stats[solver][category] = {
+                            'sum_time': 0.0, 
+                            'sum_nodes': 0, 
+                            'count': 0, 
+                            'success_count': 0,
+                            'sum_solution_length': 0,
+                            'sum_memory': 0.0,
+                        }
+                    
+                    s_cat = stats[solver][category]
+                    s_cat['count'] += 1
+                    if status == 'Finished':
+                        s_cat['success_count'] += 1
+                        s_cat['sum_time'] += float(res.get('search_time') or 0)
+                        s_cat['sum_nodes'] += int(res.get('expanded_nodes') or 0)
+                        s_cat['sum_solution_length'] += int(res.get('solution_length') or 0)
+                        s_cat['sum_memory'] += float(res.get('memory_usage') or 0.0)
+                    elif status == 'Timeout':
+                        s_cat['sum_time'] += float(timeout_val)
+
+        # Sort matches by timestamp descending, then by original order preserved from runs
+        recent_matches.sort(key=lambda x: str(x.get('timestamp', '')), reverse=True)
+        recent_matches = recent_matches[:100] # Increase limit to show more levels
+        # Format for frontend
+        formatted_stats = []
+        for solver, categories in stats.items():
+            solver_data = {'solver': solver, 'categories': []}
+            for category, data in categories.items():
+                avg_time = data['sum_time'] / data['count'] if data['count'] > 0 else 0
+                # Chỉ tính trung bình các chỉ số trên các lần thành công (để tránh null/timeout làm lệch)
+                avg_nodes = data['sum_nodes'] / data['success_count'] if data['success_count'] > 0 else 0
+                avg_solution = data['sum_solution_length'] / data['success_count'] if data['success_count'] > 0 else 0
+                avg_memory = data['sum_memory'] / data['success_count'] if data['success_count'] > 0 else 0
+                
+                success_rate = (data['success_count'] / data['count']) * 100 if data['count'] > 0 else 0
+                
+                solver_data['categories'].append({
+                    'name': category,
+                    'avg_time': round(float(avg_time), 3),
+                    'avg_nodes': int(avg_nodes),
+                    'avg_solution': round(float(avg_solution), 1),
+                    'avg_memory': round(float(avg_memory), 2),
+                    'success_rate': round(float(success_rate), 1),
+                    'total_tests': data['count'],
+                    'timeouts': data['count'] - data['success_count']
+                })
+            formatted_stats.append(solver_data)
+
+        # Global overview
+        total_games = sum(sum(c['total_tests'] for c in s['categories']) for s in formatted_stats)
+        total_success = sum(sum(cat_raw['success_count'] for cat_raw in s_raw.values()) for s_raw in stats.values())
+        win_rate = (total_success / total_games * 100) if total_games > 0 else 0
+        total_sum_time = sum(sum(cat_raw['sum_time'] for cat_raw in s_raw.values()) for s_raw in stats.values())
+        avg_solve_time = total_sum_time / total_games if total_games > 0 else 0
+
+        return jsonify({
+            'success': True,
+            'statistics': formatted_stats,
+            'overview': {
+                'total_games': total_games,
+                'win_rate': round(float(win_rate), 1),
+                'avg_time': round(float(avg_solve_time), 2)
+            },
+            'recent_matches': recent_matches,
+            'total_runs': len(all_data),
+            'last_updated': all_data[0].get('timestamp') if all_data else None
+        })
+    except Exception as e:
+        logger.error(f"Statistics aggregation error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False, 
+            'error': f'Failed to aggregate statistics: {str(e)}'
+        }), 500
 
 @socketio.on('connect')
 def handle_connect():

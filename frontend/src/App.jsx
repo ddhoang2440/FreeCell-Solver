@@ -5,6 +5,7 @@ import LayoutClient from "./layouts/user/LayoutClient";
 import { Toaster } from "react-hot-toast";
 import NotFound404 from "./components/NotFound404";
 import Game from "./pages/user/Game";
+import Statistics from "./pages/user/Statistics";
 function App() {
   return (
     <>
@@ -13,6 +14,7 @@ function App() {
         <Route element={<LayoutClient />}>
           <Route path="/" element={<Home />} />
           <Route path="/game/:gameId" element={<Game />} />
+          <Route path="/statistics" element={<Statistics />} />
         </Route>
         <Route path="*" element={<NotFound404 />} />
       </Routes>
