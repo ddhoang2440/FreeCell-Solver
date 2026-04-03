@@ -1,16 +1,13 @@
-from typing import List, Tuple, Optional, Dict
+from typing import List, Set, Tuple, Optional
 import time
 from solvers.base_solver import BaseSolver
 from game_state import FreeCellState
 
 class DFSSolver(BaseSolver):
-    def __init__(self, initial_state: FreeCellState, max_depth: int = 200, **kwargs):
+    def __init__(self, initial_state: FreeCellState,  **kwargs):
         super().__init__(initial_state, **kwargs)
-        self.max_depth = max_depth
         self.stack = []
-        # visited lưu state_hash: depth để tránh lặp vòng hoặc đi đường dài hơn đến cùng 1 trạng thái
-        self.visited: Dict[int, int] = {} 
-
+        self.visited: Set[int] = set() 
     def _send_progress(self, current_state: FreeCellState, current_path: List):
         if not hasattr(self, 'socketio') or not self.socketio:
             return
@@ -57,9 +54,10 @@ class DFSSolver(BaseSolver):
         initial_hash = hash(self.initial_state)
         
         if self.initial_state.is_goal():
+            self.solution = []
             return []
             
-        self.visited[initial_hash] = 0
+        self.visited.add(initial_hash)        
         self.stack.append((self.initial_state, []))  # (state, path)
         
         while self.stack:
@@ -91,9 +89,6 @@ class DFSSolver(BaseSolver):
                     print(f"[DFS] Nodes: {self.expanded_nodes}, Rate: {rate:.0f} n/s, Stack: {len(self.stack)}, Depth: {current_depth}")
                 self._send_progress(current_state, path)
 
-            if current_depth >= self.max_depth:
-                continue
-            
             moves = current_state.get_all_moves()
             for move in reversed(moves): 
                 new_state = current_state.apply_move(move)
@@ -107,8 +102,8 @@ class DFSSolver(BaseSolver):
                 new_depth = current_depth + 1
                 
                 # Nếu chưa thăm hoặc tìm được đường đi ngắn hơn tới trạng thái này
-                if new_hash not in self.visited or new_depth < self.visited[new_hash]:
-                    self.visited[new_hash] = new_depth
+                if new_hash not in self.visited:
+                    self.visited.add(new_hash)
                     new_path = path + [move]
                     
                     # KIỂM TRA ĐÍCH (Đã được gộp lại an toàn ở đây)

@@ -5,9 +5,18 @@
   border: 1px solid rgba(0, 0, 0, 0.15);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1);
   cursor: grab;
-  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s ease, filter 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), 
+              top 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              left 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.2s ease, 
+              filter 0.2s ease;
   user-select: none;
   overflow: hidden;
+  will-change: transform, top, left;
+}
+
+.card.is-dragging {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .card:hover {

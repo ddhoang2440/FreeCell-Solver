@@ -1,5 +1,5 @@
 {
-  "timestamp": "20260401_111247",
+  "timestamp": "20260403_191901",
   "timeout_seconds": 60,
   "runs": [
     {
@@ -9,32 +9,32 @@
         {
           "solver": "BFS",
           "status": "Finished",
-          "search_time": 0.1805737018585205,
-          "memory_usage": 6.48828125,
+          "search_time": 2.144571304321289,
+          "memory_usage": 5.659629821777344,
           "expanded_nodes": 145,
           "solution_length": 3
         },
         {
           "solver": "DFS",
           "status": "Finished",
-          "search_time": 0.09323835372924805,
-          "memory_usage": 8.609375,
-          "expanded_nodes": 102,
-          "solution_length": 102
+          "search_time": 1.1044058799743652,
+          "memory_usage": 5.265504837036133,
+          "expanded_nodes": 74,
+          "solution_length": 74
         },
         {
           "solver": "UCS",
-          "status": "Finished",
-          "search_time": 28.515702724456787,
-          "memory_usage": 172.94140625,
-          "expanded_nodes": 9367,
-          "solution_length": 34
+          "status": "Timeout",
+          "search_time": 60,
+          "memory_usage": null,
+          "expanded_nodes": null,
+          "solution_length": null
         },
         {
           "solver": "A*",
           "status": "Finished",
-          "search_time": 0.022964000701904297,
-          "memory_usage": 0.30078125,
+          "search_time": 0.0804588794708252,
+          "memory_usage": 0.2797203063964844,
           "expanded_nodes": 6,
           "solution_length": 5
         }
@@ -46,35 +46,35 @@
       "results": [
         {
           "solver": "BFS",
-          "status": "Timeout",
-          "search_time": 60,
-          "memory_usage": null,
-          "expanded_nodes": null,
-          "solution_length": null
+          "status": "Finished",
+          "search_time": 0.15630722045898438,
+          "memory_usage": 0.5099716186523438,
+          "expanded_nodes": 19,
+          "solution_length": 3
         },
         {
           "solver": "DFS",
-          "status": "Timeout",
-          "search_time": 60,
-          "memory_usage": null,
-          "expanded_nodes": null,
-          "solution_length": null
+          "status": "Finished",
+          "search_time": 0.023728132247924805,
+          "memory_usage": 0.09050369262695312,
+          "expanded_nodes": 3,
+          "solution_length": 3
         },
         {
           "solver": "UCS",
-          "status": "Timeout",
-          "search_time": 60,
-          "memory_usage": null,
-          "expanded_nodes": null,
-          "solution_length": null
+          "status": "Finished",
+          "search_time": 0.5219886302947998,
+          "memory_usage": 0.6829872131347656,
+          "expanded_nodes": 35,
+          "solution_length": 13
         },
         {
           "solver": "A*",
-          "status": "Timeout",
-          "search_time": 60,
-          "memory_usage": null,
-          "expanded_nodes": null,
-          "solution_length": null
+          "status": "Finished",
+          "search_time": 0.03502535820007324,
+          "memory_usage": 0.135345458984375,
+          "expanded_nodes": 3,
+          "solution_length": 3
         }
       ]
     },
@@ -85,32 +85,32 @@
         {
           "solver": "BFS",
           "status": "Finished",
-          "search_time": 0.16849136352539062,
-          "memory_usage": 6.51171875,
+          "search_time": 2.255459785461426,
+          "memory_usage": 5.659629821777344,
           "expanded_nodes": 145,
           "solution_length": 3
         },
         {
           "solver": "DFS",
           "status": "Finished",
-          "search_time": 0.09540987014770508,
-          "memory_usage": 8.78125,
-          "expanded_nodes": 102,
-          "solution_length": 102
+          "search_time": 1.0470612049102783,
+          "memory_usage": 5.265504837036133,
+          "expanded_nodes": 74,
+          "solution_length": 74
         },
         {
           "solver": "UCS",
-          "status": "Finished",
-          "search_time": 49.98431444168091,
-          "memory_usage": 173.859375,
-          "expanded_nodes": 9367,
-          "solution_length": 34
+          "status": "Timeout",
+          "search_time": 60,
+          "memory_usage": null,
+          "expanded_nodes": null,
+          "solution_length": null
         },
         {
           "solver": "A*",
           "status": "Finished",
-          "search_time": 0.020177602767944336,
-          "memory_usage": 0.30078125,
+          "search_time": 0.1515340805053711,
+          "memory_usage": 0.2797203063964844,
           "expanded_nodes": 6,
           "solution_length": 5
         }
@@ -122,33 +122,33 @@
       "results": [
         {
           "solver": "BFS",
-          "status": "Finished",
-          "search_time": 21.65276837348938,
-          "memory_usage": 279.06640625,
-          "expanded_nodes": 11898,
-          "solution_length": 5
+          "status": "Timeout",
+          "search_time": 60,
+          "memory_usage": null,
+          "expanded_nodes": null,
+          "solution_length": null
         },
         {
           "solver": "DFS",
           "status": "Finished",
-          "search_time": 0.04195141792297363,
-          "memory_usage": 2.17578125,
-          "expanded_nodes": 38,
-          "solution_length": 38
+          "search_time": 0.48714733123779297,
+          "memory_usage": 1.4939632415771484,
+          "expanded_nodes": 29,
+          "solution_length": 29
         },
         {
           "solver": "UCS",
-          "status": "Finished",
-          "search_time": 6.443768501281738,
-          "memory_usage": 35.1484375,
-          "expanded_nodes": 1922,
-          "solution_length": 27
+          "status": "Timeout",
+          "search_time": 60,
+          "memory_usage": null,
+          "expanded_nodes": null,
+          "solution_length": null
         },
         {
           "solver": "A*",
           "status": "Finished",
-          "search_time": 0.03999519348144531,
-          "memory_usage": 0.484375,
+          "search_time": 0.28250765800476074,
+          "memory_usage": 0.4379425048828125,
           "expanded_nodes": 7,
           "solution_length": 5
         }
@@ -161,56 +161,18 @@
         {
           "solver": "BFS",
           "status": "Finished",
-          "search_time": 8.842251062393188,
-          "memory_usage": 110.94921875,
-          "expanded_nodes": 5597,
+          "search_time": 43.26812767982483,
+          "memory_usage": 36.17094421386719,
+          "expanded_nodes": 2871,
           "solution_length": 5
         },
         {
           "solver": "DFS",
           "status": "Finished",
-          "search_time": 0.22591114044189453,
-          "memory_usage": 13.01953125,
-          "expanded_nodes": 1136,
-          "solution_length": 200
-        },
-        {
-          "solver": "UCS",
-          "status": "Finished",
-          "search_time": 4.976531028747559,
-          "memory_usage": 32.92578125,
-          "expanded_nodes": 1804,
-          "solution_length": 34
-        },
-        {
-          "solver": "A*",
-          "status": "Finished",
-          "search_time": 0.011926412582397461,
-          "memory_usage": 0.328125,
-          "expanded_nodes": 8,
-          "solution_length": 7
-        }
-      ]
-    },
-    {
-      "test_case_id": "medium-03",
-      "category": "medium",
-      "results": [
-        {
-          "solver": "BFS",
-          "status": "Finished",
-          "search_time": 16.128663778305054,
-          "memory_usage": 263.109375,
-          "expanded_nodes": 8485,
-          "solution_length": 5
-        },
-        {
-          "solver": "DFS",
-          "status": "Finished",
-          "search_time": 0.19638776779174805,
-          "memory_usage": 8.703125,
-          "expanded_nodes": 101,
-          "solution_length": 101
+          "search_time": 32.32106161117554,
+          "memory_usage": 667.3109169006348,
+          "expanded_nodes": 2150,
+          "solution_length": 2149
         },
         {
           "solver": "UCS",
@@ -223,8 +185,46 @@
         {
           "solver": "A*",
           "status": "Finished",
-          "search_time": 0.028037309646606445,
-          "memory_usage": 0.953125,
+          "search_time": 0.12786483764648438,
+          "memory_usage": 0.2987785339355469,
+          "expanded_nodes": 8,
+          "solution_length": 7
+        }
+      ]
+    },
+    {
+      "test_case_id": "medium-03",
+      "category": "medium",
+      "results": [
+        {
+          "solver": "BFS",
+          "status": "Timeout",
+          "search_time": 60,
+          "memory_usage": null,
+          "expanded_nodes": null,
+          "solution_length": null
+        },
+        {
+          "solver": "DFS",
+          "status": "Finished",
+          "search_time": 0.8721067905426025,
+          "memory_usage": 5.206304550170898,
+          "expanded_nodes": 73,
+          "solution_length": 73
+        },
+        {
+          "solver": "UCS",
+          "status": "Timeout",
+          "search_time": 60,
+          "memory_usage": null,
+          "expanded_nodes": null,
+          "solution_length": null
+        },
+        {
+          "solver": "A*",
+          "status": "Finished",
+          "search_time": 0.32107090950012207,
+          "memory_usage": 0.8877143859863281,
           "expanded_nodes": 12,
           "solution_length": 9
         }
@@ -244,11 +244,11 @@
         },
         {
           "solver": "DFS",
-          "status": "Timeout",
-          "search_time": 60,
-          "memory_usage": null,
-          "expanded_nodes": null,
-          "solution_length": null
+          "status": "Finished",
+          "search_time": 6.3125646114349365,
+          "memory_usage": 131.04104328155518,
+          "expanded_nodes": 861,
+          "solution_length": 861
         },
         {
           "solver": "UCS",
@@ -261,8 +261,8 @@
         {
           "solver": "A*",
           "status": "Finished",
-          "search_time": 0.1192464828491211,
-          "memory_usage": 2.7109375,
+          "search_time": 0.7693414688110352,
+          "memory_usage": 2.2878379821777344,
           "expanded_nodes": 32,
           "solution_length": 13
         }

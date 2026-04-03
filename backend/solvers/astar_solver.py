@@ -202,6 +202,10 @@ class AStarSolver(BaseSolver):
         
         heapq.heappush(self.priority_queue, (initial_h, 0, 0, self.initial_state, []))
         
+        if self.initial_state.is_goal():
+            self.solution = []
+            return []
+            
         counter = 1
         
         while self.priority_queue and self.expanded_nodes < node_limit:
