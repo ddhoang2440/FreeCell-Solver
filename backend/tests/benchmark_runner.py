@@ -66,8 +66,8 @@ def run_benchmark(timeout=60):
         print(f"Test Case: {tc_id} | Category: {tc_cat}")
         print(f"Desc: {tc.get('description', '')}")
         print(f"======================================================================")
-        print(f"{'Solver':<8} | {'Time (s)':<10} | {'Mem (MB)':<10} | {'Nodes':<10} | {'Sol Len':<10}")
-        print("-" * 70)
+        print(f"{'Solver':<8} | {'Time (s)':<10} | {'Peak Mem (MB)':<14} | {'Nodes':<10} | {'Sol Len':<10}")
+        print("-" * 74)
         
         state_data = tc.get('state_data', {})
         state = create_state_from_json(state_data)
@@ -102,7 +102,7 @@ def run_benchmark(timeout=60):
                     success, data = queue.get()
                     if success:
                         res = data
-                        print(f"{solver_name:<8} | {res['search_time']:<10.3f} | {res['memory_usage']:<10.2f} | {res['expanded_nodes']:<10} | {res['solution_length']:<10}")
+                        print(f"{solver_name:<8} | {res['search_time']:<10.3f} | {res['memory_usage']:<14.2f} | {res['expanded_nodes']:<10} | {res['solution_length']:<10}")
                         res_dict = {
                             'solver': solver_name,
                             'status': 'Finished',
@@ -137,7 +137,7 @@ def run_benchmark(timeout=60):
     # Ghi nhận log CSV
     with open(csv_file_path, mode='w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
-        writer.writerow(['Test_ID', 'Category', 'Solver', 'Status', 'Time(s)', 'Memory(MB)', 'Nodes', 'Solution_Length'])
+        writer.writerow(['Test_ID', 'Category', 'Solver', 'Status', 'Time(s)', 'Peak_Memory(MB)', 'Nodes', 'Solution_Length'])
         for tc_dict in all_results:
             for r in tc_dict['results']:
                 writer.writerow([

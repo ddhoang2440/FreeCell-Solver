@@ -92,7 +92,7 @@ class UCSSolver(BaseSolver):
         )
         empty_count = sum(1 for col in state.cascades if not col)
         fd_key = tuple(
-            (str(suit), len(pile))
+            (suit.name if hasattr(suit, 'name') else str(suit), len(pile))
             for suit, pile in sorted(state.foundations.items(),
                                      key=lambda x: str(x[0]))
         )
