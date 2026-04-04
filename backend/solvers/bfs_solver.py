@@ -14,18 +14,17 @@ class BFSSolver(BaseSolver):
     def _send_progress(self, current_state: FreeCellState, current_depth: int):
         socketio = getattr(self, 'socketio', None)
         if not socketio: return
-            
+
         current_time = time.time()
-        if not hasattr(self, 'last_progress_time'):
-            self.last_progress_time = current_time
-        elif current_time - self.last_progress_time < 0.5:
-            return 
-            
+        last = getattr(self, 'last_progress_time', 0)
+        if last > 0 and current_time - last < 0.5:
+            return
+
         self.last_progress_time = current_time
         foundation_cards = sum(len(f) for f in current_state.foundations.values())
         elapsed = current_time - self.start_time if self.start_time else 1
         rate = self.expanded_nodes / elapsed if elapsed > 0 else 0
-        
+
         try:
             socketio.emit('solver_progress', {
                 'game_id': getattr(self, 'game_id', None),
@@ -40,7 +39,7 @@ class BFSSolver(BaseSolver):
             })
         except Exception: pass
 
-    def solve(self, node_limit: int = 500000) -> Optional[List[Tuple]]:
+    def solve(self, node_limit: int = 200000, max_time: int = 300) -> Optional[List[Tuple]]:
         """BFS chuẩn - Tìm đường đi ngắn nhất dựa trên số quyết định của AI."""
         self.queue.clear()
         self.parent_map.clear()
@@ -56,14 +55,21 @@ class BFSSolver(BaseSolver):
             self.solution = []
             return []
             
-        # Trạng thái ban đầu: Không có cha, không có nước đi dẫn đến nó
         self.visited.add(initial_hash)
         self.queue.append(self.initial_state)
         self.parent_map[initial_hash] = (None, None)
 
+        # Gửi progress ban đầu ngay khi bắt đầu
+        self._send_progress(self.initial_state, 0)
+
         try:
             while self.queue:
                 if getattr(self, 'cancelled', False): return None
+
+                current_time = time.time()
+                if current_time - self.start_time > max_time:
+                    if verbose: print(f"[BFS] Time limit reached!")
+                    return None
 
                 current_state = self.queue.popleft()
                 self.expanded_nodes += 1
@@ -76,7 +82,7 @@ class BFSSolver(BaseSolver):
                 current_path_temp = self._reconstruct_path(hash(current_state))
                 current_depth = len(current_path_temp)
 
-                if self.expanded_nodes % 5000 == 0:
+                if self.expanded_nodes % 1000 == 0:
                     self._send_progress(current_state, current_depth)
                     if verbose:
                         print(f"Nodes: {self.expanded_nodes}, Queue: {len(self.queue)}, Depth: {current_depth}")

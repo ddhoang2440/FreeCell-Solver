@@ -286,8 +286,8 @@ class UCSSolver(BaseSolver):
     # ------------------------------------------------------------------ #
     #  Main search                                                         #
     # ------------------------------------------------------------------ #
-    def solve(self, node_limit: float = float("inf"),
-              max_time: int = 86400) -> Optional[List[Tuple]]:
+    def solve(self, node_limit: int = 200000,
+              max_time: int = 300) -> Optional[List[Tuple]]:
         """
         UCS chuẩn với:
           - Cost additive-only (range 1–4), không state delta
@@ -325,6 +325,9 @@ class UCSSolver(BaseSolver):
 
         print("[UCS] Starting — cost 1–4, canonical key, hash-only heap")
 
+        # Gửi progress ban đầu ngay khi bắt đầu
+        self._send_progress(initial_state, 0)
+
         while self.priority_queue and self.expanded_nodes < node_limit:
             now = time.time()
             if now - self.start_time > max_time:
@@ -347,7 +350,7 @@ class UCSSolver(BaseSolver):
             # Tra state object từ dict
             current_state = self._state_by_hash[current_hash]
 
-            if self.expanded_nodes % 5_000 == 0:
+            if self.expanded_nodes % 1_000 == 0:
                 elapsed = time.time() - self.start_time
                 rate    = self.expanded_nodes / elapsed if elapsed > 0 else 0
                 print(
