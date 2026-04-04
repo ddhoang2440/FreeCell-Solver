@@ -7,7 +7,7 @@ import {
 } from "recharts";
 import { 
   IconHistory, IconBrain, IconTrophy, IconHourglassHigh, IconArrowLeft,
-  IconChartBar, IconChartPie, IconHash, IconExternalLink
+  IconChartBar, IconChartPie, IconHash, IconExternalLink, IconLayoutGrid
 } from "@tabler/icons-react";
 import "./Statistics.css";
 
@@ -21,6 +21,7 @@ const SOLVER_COLORS = {
 };
 
 const LEVELS = ["all", "easy", "medium", "hard", "Unbeatable"];
+const DIFFICULTY_LEVELS = ["easy", "medium", "hard", "Unbeatable"];
 
 // --- Sub-components ---
 
@@ -57,6 +58,38 @@ const ChartWrapper = ({ title, icon: Icon, children, subtitle }) => (
     <div className="h-[280px] w-full mt-2">
       <ResponsiveContainer width="100%" height="100%">
         {children}
+      </ResponsiveContainer>
+    </div>
+  </div>
+);
+
+// Grouped chart: X = difficulty level, bars = solvers
+const LevelGroupedChart = ({ title, icon: Icon, subtitle, data, yAxisProps = {} }) => (
+  <div className="glass-card p-5 overflow-hidden">
+    <div className="flex items-center gap-2.5 mb-5">
+      <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+        <Icon className="text-emerald-500 w-4 h-4" />
+      </div>
+      <div>
+        <h3 className="text-base font-bold text-white tracking-tight">{title}</h3>
+        {subtitle && <p className="text-[10px] text-slate-400 mt-0.5">{subtitle}</p>}
+      </div>
+    </div>
+    <div className="h-[260px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }} barCategoryGap="25%" barGap={2}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+          <XAxis dataKey="level" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} />
+          <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} {...yAxisProps} />
+          <Tooltip
+            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+            contentStyle={{ borderRadius: '12px', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', fontSize: '11px' }}
+          />
+          <Legend wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }} />
+          {Object.entries(SOLVER_COLORS).map(([solver, color]) => (
+            <Bar key={solver} dataKey={solver} name={solver} fill={color} radius={[4, 4, 0, 0]} maxBarSize={28} />
+          ))}
+        </BarChart>
       </ResponsiveContainer>
     </div>
   </div>
@@ -191,7 +224,10 @@ const Statistics = () => {
   // --- Data Transformations ---
 
   const processedData = useMemo(() => {
-    if (!rawData || rawData.length === 0) return { timeData: [], nodeData: [], solutionData: [], memoryData: [], heatmapData: [] };
+    if (!rawData || rawData.length === 0) return {
+      timeData: [], nodeData: [], solutionData: [], memoryData: [], heatmapData: [],
+      levelTimeData: [], levelNodeData: [], levelSolutionData: [], levelMemoryData: []
+    };
 
     const heatmapData = [];
     rawData.forEach(s => {
@@ -205,7 +241,7 @@ const Statistics = () => {
       });
     });
 
-    // Filtering logic
+    // Filtering logic for single-level view
     const filterByLevel = (level) => {
       const solvers = ["BFS", "DFS", "UCS", "A*"];
       return solvers.map(solverName => {
@@ -230,11 +266,52 @@ const Statistics = () => {
       });
     };
 
-    const currentStats = filterByLevel(selectedLevel);
-
     const filteredMatches = selectedLevel === "all" 
       ? recentMatches 
       : recentMatches.filter(m => m.category?.toLowerCase() === selectedLevel.toLowerCase());
+
+    const solvers = ["BFS", "DFS", "UCS", "A*"];
+
+    // Dynamic grouping based on selected level
+    const buildGroupedChartData = (metric, matchMetricKey) => {
+      if (selectedLevel === "all") {
+        // ROWS = DIFFICULTY LEVELS
+        return DIFFICULTY_LEVELS.map(level => {
+          const row = { level };
+          rawData.forEach(solverObj => {
+            const cat = solverObj.categories.find(c => c.name.toLowerCase() === level.toLowerCase());
+            const val = cat ? (cat[metric] || 0) : 0;
+            row[solverObj.solver] = metric === 'avg_nodes' ? Math.max(1, Math.round(val)) : Number(val.toFixed(3));
+          });
+          return row;
+        });
+      } else {
+        // ROWS = SPECIFIC TEST CASES (SEEDS) within the filtered matches
+        const uniqueSeeds = Array.from(new Set(filteredMatches.map(m => m.seed))).sort();
+        return uniqueSeeds.map(seed => {
+          const row = { level: seed }; // Use 'level' key so the XAxis handles it seamlessly
+          solvers.forEach(solver => {
+            const match = filteredMatches.find(m => m.seed === seed && m.solver === solver);
+            if (match) {
+              const rawVal = match[matchMetricKey] || 0;
+              if (matchMetricKey === 'expanded_nodes') {
+                // Log scales break with 0 values, enforce min 1
+                row[solver] = Math.max(1, Math.round(rawVal));
+              } else if (matchMetricKey === 'solution_length') {
+                row[solver] = Math.round(rawVal);
+              } else {
+                row[solver] = Number(rawVal.toFixed(3));
+              }
+            } else {
+              row[solver] = matchMetricKey === 'expanded_nodes' ? 1 : 0;
+            }
+          });
+          return row;
+        });
+      }
+    };
+
+    const currentStats = filterByLevel(selectedLevel);
 
     return {
       timeData: currentStats,
@@ -242,7 +319,11 @@ const Statistics = () => {
       solutionData: currentStats,
       memoryData: currentStats,
       heatmapData,
-      filteredMatches
+      filteredMatches,
+      levelTimeData: buildGroupedChartData('avg_time', 'search_time'),
+      levelNodeData: buildGroupedChartData('avg_nodes', 'expanded_nodes'),
+      levelSolutionData: buildGroupedChartData('avg_solution', 'solution_length'),
+      levelMemoryData: buildGroupedChartData('avg_memory', 'memory_usage'),
     };
   }, [rawData, recentMatches, selectedLevel]);
 
@@ -300,31 +381,17 @@ const Statistics = () => {
 
         {/* Overview Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-          <StatCard 
-            label="Total Runs" 
-            value={overview.total_games} 
-            icon={IconTrophy} 
-          />
-          <StatCard 
-            label="Avg. Success Rate" 
-            value={`${overview.win_rate}%`} 
-            icon={IconBrain} 
-            color="emerald"
-          />
-          <StatCard 
-            label="Avg. Compute Time" 
-            value={`${overview.avg_time}s`} 
-            icon={IconHourglassHigh} 
-            color="rose"
-          />
+          <StatCard label="Total Runs" value={overview.total_games} icon={IconTrophy} />
+          <StatCard label="Avg. Success Rate" value={`${overview.win_rate}%`} icon={IconBrain} color="emerald" />
+          <StatCard label="Avg. Compute Time" value={`${overview.avg_time}s`} icon={IconHourglassHigh} color="rose" />
         </div>
 
         {/* Level Heatmap */}
         <div className="mb-8">
-           <TimeoutHeatmap data={processedData.heatmapData} />
+          <TimeoutHeatmap data={processedData.heatmapData} />
         </div>
 
-        {/* Charts Grid */}
+        {/* Charts Grid — filtered by selected level */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <ChartWrapper title="Search Time" icon={IconHourglassHigh} subtitle="Time taken to find a valid solution (seconds)">
             <BarChart data={processedData.timeData} {...commonProps}>
@@ -365,6 +432,51 @@ const Statistics = () => {
               <Bar dataKey="memory" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ChartWrapper>
+        </div>
+
+        {/* ── Per-Level/Per-Test Breakdown ── */}
+        <div className="mb-3 flex items-center gap-2.5">
+          <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+            <IconLayoutGrid className="text-emerald-500 w-4 h-4" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-white tracking-tight">
+              {selectedLevel === "all" ? "Per-Level Breakdown" : `Per-Test Breakdown: ${selectedLevel.toUpperCase()}`}
+            </h2>
+            <p className="text-[10px] text-slate-400">
+              {selectedLevel === "all" 
+                ? "All difficulty levels side by side — compare how each solver scales"
+                : "Specific test cases side by side — evaluate single board performance"}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <LevelGroupedChart
+            title={selectedLevel === "all" ? "Search Time by Level" : "Search Time per Test"}
+            icon={IconHourglassHigh}
+            subtitle={selectedLevel === "all" ? "Avg. seconds per difficulty (all solvers)" : "Seconds per test case"}
+            data={processedData.levelTimeData}
+          />
+          <LevelGroupedChart
+            title={selectedLevel === "all" ? "Expanded Nodes by Level" : "Expanded Nodes per Test"}
+            icon={IconBrain}
+            subtitle={selectedLevel === "all" ? "Avg. nodes explored per difficulty" : "Nodes explored per test case"}
+            data={processedData.levelNodeData}
+            yAxisProps={{ scale: "log", domain: ['auto', 'auto'], allowDataOverflow: true }}
+          />
+          <LevelGroupedChart
+            title={selectedLevel === "all" ? "Solution Length by Level" : "Solution Length per Test"}
+            icon={IconTrophy}
+            subtitle={selectedLevel === "all" ? "Avg. moves to solve per difficulty" : "Moves to solve per test case"}
+            data={processedData.levelSolutionData}
+          />
+          <LevelGroupedChart
+            title={selectedLevel === "all" ? "Memory Usage by Level" : "Memory Usage per Test"}
+            icon={IconHash}
+            subtitle={selectedLevel === "all" ? "Avg. MB used per difficulty" : "MB used per test case"}
+            data={processedData.levelMemoryData}
+          />
         </div>
 
         {/* History Table */}

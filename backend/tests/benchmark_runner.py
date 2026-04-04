@@ -21,11 +21,11 @@ from backend.solvers.astar_solver import AStarSolver
 
 from backend.test_parser import create_state_from_json, load_tests_config
 
-def run_solver_worker(solver_class, state, queue):
+def run_solver_worker(solver_class, state, queue, max_time):
     """Worker chạy trong process riêng biệt để có thể force kill nếu timeout"""
     try:
         solver = solver_class(state)
-        result = solver.measure_performance()
+        result = solver.measure_performance(max_time=max_time)
         queue.put((True, result))
     except Exception as e:
         queue.put((False, str(e)))
@@ -78,7 +78,7 @@ def run_benchmark(timeout=60):
             queue = multiprocessing.Queue()
             process = multiprocessing.Process(
                 target=run_solver_worker, 
-                args=(solver_class, state, queue)
+                args=(solver_class, state, queue, timeout)
             )
             process.start()
             
@@ -157,4 +157,4 @@ def run_benchmark(timeout=60):
 
 if __name__ == '__main__':
     # Hạn chế cấp multiprocessing spawn trên Windows phải bọc trong main
-    run_benchmark(timeout=60)
+    run_benchmark(timeout=36000)

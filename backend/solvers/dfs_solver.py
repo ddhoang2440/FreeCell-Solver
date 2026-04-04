@@ -11,24 +11,24 @@ class DFSSolver(BaseSolver):
     def _send_progress(self, current_state: FreeCellState, current_path: List):
         if not hasattr(self, 'socketio') or not self.socketio:
             return
-            
+
         current_time = time.time()
-        
-        # Chỉ cập nhật WebUI nhiều nhất mỗi 0.5 giây để tránh lag
-        if not hasattr(self, 'last_progress_time'):
-            self.last_progress_time = current_time
-        elif current_time - self.last_progress_time < 0.5:
+
+        # Cập nhật WebUI nhiều nhất mỗi 0.5 giây để tránh lag
+        # last_progress_time = 0 → emit ngay lần đầu
+        last = getattr(self, 'last_progress_time', 0)
+        if last > 0 and current_time - last < 0.5:
             return
-            
+
         self.last_progress_time = current_time
-        
+
         foundation_cards = sum(len(f) for f in current_state.foundations.values())
         progress = (foundation_cards / 52.0) * 100
         free_cells_used = sum(1 for cell in current_state.free_cells if cell is not None)
-        
+
         elapsed = current_time - self.start_time if getattr(self, 'start_time', None) else 1
         rate = self.expanded_nodes / elapsed if elapsed > 0 else 0
-        
+
         try:
             self.socketio.emit('solver_progress', {
                 'game_id': getattr(self, 'game_id', None),
@@ -44,8 +44,8 @@ class DFSSolver(BaseSolver):
         except Exception:
             pass
 
-    def solve(self, node_limit: int = 500000, max_time: int = 36000) -> Optional[List[Tuple]]:
-        """Thuật toán DFS thuần (Pure Depth-First Search)"""
+    def solve(self, node_limit: int = 200000, max_time: int = 300) -> Optional[List[Tuple]]:
+        """Depth-First Search"""
         self.visited.clear()
         self.stack.clear()
         self.expanded_nodes = 0
@@ -59,7 +59,10 @@ class DFSSolver(BaseSolver):
             
         self.visited.add(initial_hash)        
         self.stack.append((self.initial_state, []))  # (state, path)
-        
+
+        # Gửi progress ban đầu ngay khi bắt đầu
+        self._send_progress(self.initial_state, [])
+
         while self.stack:
             if getattr(self, 'cancelled', False):
                 if self.verbose:
@@ -82,7 +85,7 @@ class DFSSolver(BaseSolver):
             current_depth = len(path)
             self.expanded_nodes += 1
             
-            if self.expanded_nodes % 5000 == 0:
+            if self.expanded_nodes % 1000 == 0:
                 elapsed = current_time - self.start_time
                 rate = self.expanded_nodes / elapsed if elapsed > 0 else 0
                 if self.verbose:

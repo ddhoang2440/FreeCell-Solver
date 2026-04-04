@@ -117,33 +117,30 @@ class AStarSolver(BaseSolver):
         return max(0, min(99, progress))
     def _send_progress(self, current_state: FreeCellState, current_path: List):
         if getattr(self, 'cancelled', False):
-                return None
-        
+            return None
+        if not self.socketio:
+            return
+
         current_time = time.time()
 
         time_diff = current_time - self.last_progress_time
-        nodes_diff = self.expanded_nodes - self.last_sent_nodes if hasattr(self, 'last_sent_nodes') else 0
-        
-        if time_diff < 2 and nodes_diff < 10000:
-            return  
-        if not self.socketio:
+        nodes_diff = self.expanded_nodes - self.last_sent_nodes
+
+        if time_diff < 1 and nodes_diff < 5000:
             return
-            
+
         current_heuristic = self._heuristic(current_state)
         progress = self._get_progress(current_heuristic)
-        
+
         if current_heuristic < self.best_heuristic:
             self.best_heuristic = current_heuristic
-        
-        foundation_cards = 0
-        for suit in current_state.foundations:
-            foundation_cards += len(current_state.foundations[suit])
-        
+
+        foundation_cards = sum(len(current_state.foundations[suit]) for suit in current_state.foundations)
         free_cells_used = sum(1 for cell in current_state.free_cells if cell is not None)
-        
+
         elapsed = current_time - self.start_time if self.start_time else 1
         rate = self.expanded_nodes / elapsed if elapsed > 0 else 0
-        
+
         try:
             self.socketio.emit('solver_progress', {
                 'game_id': self.game_id,
@@ -158,13 +155,14 @@ class AStarSolver(BaseSolver):
                 'exploration_rate': round(rate, 1),
                 'estimated_remaining': self._estimate_remaining_time(rate, current_heuristic)
             })
-            
+
             self.last_progress_time = current_time
             self.last_sent_nodes = self.expanded_nodes
-            
-        except Exception as e:
+
+        except Exception:
             pass
-    
+
+
     def _estimate_remaining_time(self, rate: float, current_heuristic: float) -> str:
         if rate <= 0:
             return "calculating..."
@@ -180,7 +178,7 @@ class AStarSolver(BaseSolver):
         else:
             return f"~{int(estimated_seconds/3600)}h"
         
-    def solve(self, node_limit: int = 500000, max_time: int = 86400) -> Optional[List[Tuple]]:
+    def solve(self, node_limit: int = 200000, max_time: int = 300) -> Optional[List[Tuple]]:
         self.priority_queue.clear()
         self.g_score.clear()
         self.f_score.clear()
@@ -207,7 +205,10 @@ class AStarSolver(BaseSolver):
             return []
             
         counter = 1
-        
+
+        # Gửi progress ban đầu ngay khi bắt đầu
+        self._send_progress(self.initial_state, [])
+
         while self.priority_queue and self.expanded_nodes < node_limit:
             current_time = time.time()
             if current_time - self.start_time > max_time:

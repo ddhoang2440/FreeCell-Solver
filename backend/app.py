@@ -670,7 +670,7 @@ def get_statistics():
                     solver = res.get('solver', 'unknown')
                     status = res.get('status', 'unknown')
                     
-                    # For History Table
+                    # For History Table and Per-Test Charts
                     s_time = res.get('search_time')
                     recent_matches.append({
                         'timestamp': run_timestamp,
@@ -679,7 +679,9 @@ def get_statistics():
                         'status': status,
                         'category': category,
                         'solution_length': res.get('solution_length'),
-                        'search_time': round(float(s_time), 3) if s_time is not None else None
+                        'search_time': round(float(s_time), 3) if s_time is not None else None,
+                        'expanded_nodes': res.get('expanded_nodes'),
+                        'memory_usage': res.get('memory_usage')
                     })
 
                     if solver not in stats:
@@ -707,7 +709,7 @@ def get_statistics():
 
         # Sort matches by timestamp descending, then by original order preserved from runs
         recent_matches.sort(key=lambda x: str(x.get('timestamp', '')), reverse=True)
-        recent_matches = recent_matches[:100] # Increase limit to show more levels
+        recent_matches = recent_matches[:300] # Increase limit to show more levels
         # Format for frontend
         formatted_stats = []
         for solver, categories in stats.items():
@@ -777,8 +779,9 @@ if __name__ == '__main__':
     print(f"WebSocket available on ws://localhost:5000")
     print("=" * 50)
     
-    socketio.run(app, 
-                debug=True, 
+    socketio.run(app,
+                debug=True,
                 port=5000,
                 host='localhost',
+                use_reloader=False,
                 allow_unsafe_werkzeug=True)
