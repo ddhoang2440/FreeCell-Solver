@@ -3,9 +3,9 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  PieChart, Pie, Cell,
+  PieChart, Pie, Cell, LabelList
 } from "recharts";
-import { 
+import {
   IconHistory, IconBrain, IconTrophy, IconHourglassHigh, IconArrowLeft,
   IconChartBar, IconChartPie, IconHash, IconExternalLink, IconLayoutGrid
 } from "@tabler/icons-react";
@@ -20,8 +20,8 @@ const SOLVER_COLORS = {
   "A*": "#f43f5e",
 };
 
-const LEVELS = ["all", "easy", "medium", "hard", "Unbeatable"];
-const DIFFICULTY_LEVELS = ["easy", "medium", "hard", "Unbeatable"];
+const LEVELS = ["all", "easy", "hard"];
+const DIFFICULTY_LEVELS = ["easy", "hard"];
 
 // --- Sub-components ---
 
@@ -64,8 +64,8 @@ const ChartWrapper = ({ title, icon: Icon, children, subtitle }) => (
 );
 
 // Grouped chart: X = difficulty level, bars = solvers
-const LevelGroupedChart = ({ title, icon: Icon, subtitle, data, yAxisProps = {} }) => (
-  <div className="glass-card p-5 overflow-hidden">
+const LevelGroupedChart = ({ title, icon: Icon, subtitle, data, yAxisProps = {}, yAxisLabel, formatter, labelFormatter }) => (
+  <div className="glass-card p-5 overflow-hidden flex flex-col" style={{ background: "rgba(15, 23, 42, 0.4)" }}>
     <div className="flex items-center gap-2.5 mb-5">
       <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
         <Icon className="text-emerald-500 w-4 h-4" />
@@ -75,19 +75,46 @@ const LevelGroupedChart = ({ title, icon: Icon, subtitle, data, yAxisProps = {} 
         {subtitle && <p className="text-[10px] text-slate-400 mt-0.5">{subtitle}</p>}
       </div>
     </div>
-    <div className="h-[260px] w-full">
+    <div className="flex-1 w-full min-h-[280px]">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }} barCategoryGap="25%" barGap={2}>
+        <BarChart data={data} margin={{ top: 20, right: 10, left: 40, bottom: 20 }} barCategoryGap="20%" barGap={6}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-          <XAxis dataKey="level" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} />
-          <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} {...yAxisProps} />
+          <XAxis
+            dataKey="level"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: '#94a3b8', fontSize: 10 }}
+          />
+          <YAxis
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: '#94a3b8', fontSize: 10 }}
+            label={{ value: yAxisLabel, angle: -90, position: 'insideLeft', offset: -35, fill: '#64748b', fontSize: 10, fontWeight: 600 }}
+            tickFormatter={(v) => typeof v === 'number' && v >= 1000 ? `${v / 1000}k` : v}
+            {...yAxisProps}
+          />
           <Tooltip
             cursor={{ fill: 'rgba(255,255,255,0.05)' }}
             contentStyle={{ borderRadius: '12px', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', fontSize: '11px' }}
+            formatter={(value) => formatter ? formatter(value) : value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           />
-          <Legend wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }} />
+          <Legend wrapperStyle={{ fontSize: '10px', paddingTop: '12px' }} />
           {Object.entries(SOLVER_COLORS).map(([solver, color]) => (
-            <Bar key={solver} dataKey={solver} name={solver} fill={color} radius={[4, 4, 0, 0]} maxBarSize={28} />
+            <Bar key={solver} dataKey={solver} name={solver} fill={color} radius={[4, 4, 0, 0]} maxBarSize={32} minPointSize={8}>
+              <LabelList
+                dataKey={solver}
+                position="top"
+                fill={color}
+                fontSize={9}
+                fontWeight={600}
+                formatter={(v) => {
+                  if (labelFormatter) return labelFormatter(v);
+                  if (v === 0 || v === 0.001) return "";
+                  if (v >= 1000) return (v / 1000).toFixed(1).replace('.0', '') + 'k';
+                  return Number(v).toLocaleString(undefined, { maximumFractionDigits: 1 });
+                }}
+              />
+            </Bar>
           ))}
         </BarChart>
       </ResponsiveContainer>
@@ -95,57 +122,7 @@ const LevelGroupedChart = ({ title, icon: Icon, subtitle, data, yAxisProps = {} 
   </div>
 );
 
-const TimeoutHeatmap = ({ data }) => {
-  if (!data || data.length === 0) return null;
-  const solvers = ["BFS", "DFS", "UCS", "A*"];
-  const levels = ["easy", "medium", "hard", "Unbeatable"];
 
-  return (
-    <div className="glass-card p-5 w-full overflow-hidden">
-      <div className="flex items-center gap-2.5 mb-6">
-        <div className="p-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20">
-          <IconChartPie className="text-rose-500 w-4 h-4" />
-        </div>
-        <h3 className="text-base font-bold text-white tracking-tight">Reliability Matrix (Timeouts)</h3>
-      </div>
-      <div className="grid grid-cols-5 gap-2 min-w-[500px]">
-        <div /> 
-        {levels.map(l => (
-          <div key={l} className="text-center text-[10px] uppercase font-bold text-slate-400 pb-2">{l}</div>
-        ))}
-        {solvers.map(s => (
-          <React.Fragment key={s}>
-            <div className="text-xs font-bold text-white flex items-center pr-2">{s}</div>
-            {levels.map(l => {
-              const item = data.find(d => d.solver === s && d.category === l);
-              const timeouts = item?.timeouts || 0;
-              const total = item?.total || 0;
-              const rate = total > 0 ? (timeouts / total) : 0;
-              const opacity = rate > 0 ? 0.1 + (rate * 0.8) : 0;
-              return (
-                <div 
-                  key={`${s}-${l}`}
-                  className="h-10 rounded-lg flex items-center justify-center text-[10px] border border-white/5 relative group"
-                  style={{ 
-                    background: rate > 0 ? `rgba(244, 63, 94, ${opacity})` : 'rgba(16, 185, 129, 0.1)',
-                    borderColor: rate > 0 ? `rgba(244, 63, 94, 0.2)` : 'rgba(16, 185, 129, 0.2)'
-                  }}
-                >
-                  <span className={rate > 0 ? "text-white font-bold" : "text-emerald-400"}>
-                    {rate > 0 ? `${Math.round(rate * 100)}%` : "0%"}
-                  </span>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 border border-white/10 rounded text-[9px] whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
-                    {timeouts} timeouts out of {total} runs
-                  </div>
-                </div>
-              );
-            })}
-          </React.Fragment>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const HistoryTable = ({ matches, showAll, onToggle }) => (
   <div className="glass-card p-4 overflow-hidden">
@@ -154,7 +131,7 @@ const HistoryTable = ({ matches, showAll, onToggle }) => (
         <IconHistory className="text-amber-500 w-4 h-4" />
         <h3 className="text-base font-bold">Recent Matches</h3>
       </div>
-      <button 
+      <button
         onClick={onToggle}
         className="text-[10px] font-semibold text-amber-500 flex items-center gap-1 hover:underline transition-all"
       >
@@ -247,7 +224,7 @@ const Statistics = () => {
       return solvers.map(solverName => {
         const solverObj = rawData.find(s => s.solver.toUpperCase() === solverName.toUpperCase());
         if (!solverObj) return { name: solverName, value: 0 };
-        
+
         let targetCats = solverObj.categories;
         if (level !== "all") {
           targetCats = targetCats.filter(c => c.name.toLowerCase() === level.toLowerCase());
@@ -257,17 +234,17 @@ const Statistics = () => {
 
         return {
           name: solverName,
-          time: Number((targetCats.reduce((acc, c) => acc + c.avg_time, 0) / targetCats.length).toFixed(3)),
-          nodes: Math.round(targetCats.reduce((acc, c) => acc + c.avg_nodes, 0) / targetCats.length),
+          time: Math.max(0.001, Number((targetCats.reduce((acc, c) => acc + c.avg_time, 0) / targetCats.length).toFixed(3))),
+          nodes: Math.max(1, Math.round(targetCats.reduce((acc, c) => acc + c.avg_nodes, 0) / targetCats.length)),
           solution: Number((targetCats.reduce((acc, c) => acc + c.avg_solution, 0) / targetCats.length).toFixed(1)),
-          memory: Number((targetCats.reduce((acc, c) => acc + c.avg_memory, 0) / targetCats.length).toFixed(2)),
+          memory: Math.max(0.001, Number((targetCats.reduce((acc, c) => acc + c.avg_memory, 0) / targetCats.length).toFixed(2))),
           fill: SOLVER_COLORS[solverName]
         };
       });
     };
 
-    const filteredMatches = selectedLevel === "all" 
-      ? recentMatches 
+    const filteredMatches = selectedLevel === "all"
+      ? recentMatches
       : recentMatches.filter(m => m.category?.toLowerCase() === selectedLevel.toLowerCase());
 
     const solvers = ["BFS", "DFS", "UCS", "A*"];
@@ -281,7 +258,13 @@ const Statistics = () => {
           rawData.forEach(solverObj => {
             const cat = solverObj.categories.find(c => c.name.toLowerCase() === level.toLowerCase());
             const val = cat ? (cat[metric] || 0) : 0;
-            row[solverObj.solver] = metric === 'avg_nodes' ? Math.max(1, Math.round(val)) : Number(val.toFixed(3));
+            if (metric === 'avg_nodes') {
+              row[solverObj.solver] = Math.max(1, Math.round(val));
+            } else if (metric === 'avg_time' || metric === 'avg_memory') {
+              row[solverObj.solver] = Math.max(0.001, Number(val.toFixed(3)));
+            } else {
+              row[solverObj.solver] = Number(val.toFixed(3));
+            }
           });
           return row;
         });
@@ -292,18 +275,13 @@ const Statistics = () => {
           const row = { level: seed }; // Use 'level' key so the XAxis handles it seamlessly
           solvers.forEach(solver => {
             const match = filteredMatches.find(m => m.seed === seed && m.solver === solver);
-            if (match) {
-              const rawVal = match[matchMetricKey] || 0;
-              if (matchMetricKey === 'expanded_nodes') {
-                // Log scales break with 0 values, enforce min 1
-                row[solver] = Math.max(1, Math.round(rawVal));
-              } else if (matchMetricKey === 'solution_length') {
-                row[solver] = Math.round(rawVal);
-              } else {
-                row[solver] = Number(rawVal.toFixed(3));
-              }
+            const rawVal = match ? (match[matchMetricKey] || 0) : 0;
+            if (matchMetricKey === 'expanded_nodes') {
+              row[solver] = Math.max(1, Math.round(rawVal));
+            } else if (matchMetricKey === 'search_time' || matchMetricKey === 'memory_usage') {
+              row[solver] = Math.max(0.001, Number(rawVal.toFixed(3)));
             } else {
-              row[solver] = matchMetricKey === 'expanded_nodes' ? 1 : 0;
+              row[solver] = Math.round(rawVal);
             }
           });
           return row;
@@ -352,7 +330,7 @@ const Statistics = () => {
   return (
     <div className="stats-container py-4 md:py-8">
       <div className="max-w-6xl mx-auto px-4">
-        
+
         {/* Header */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6">
           <div>
@@ -386,10 +364,6 @@ const Statistics = () => {
           <StatCard label="Avg. Compute Time" value={`${overview.avg_time}s`} icon={IconHourglassHigh} color="rose" />
         </div>
 
-        {/* Level Heatmap */}
-        <div className="mb-8">
-          <TimeoutHeatmap data={processedData.heatmapData} />
-        </div>
 
         {/* Charts Grid — filtered by selected level */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -399,7 +373,7 @@ const Statistics = () => {
               <XAxis dataKey="name" {...axisTheme} />
               <YAxis {...axisTheme} />
               <Tooltip {...tooltipTheme} />
-              <Bar dataKey="time" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="time" radius={[6, 6, 0, 0]} minPointSize={8} />
             </BarChart>
           </ChartWrapper>
 
@@ -409,7 +383,7 @@ const Statistics = () => {
               <XAxis dataKey="name" {...axisTheme} />
               <YAxis {...axisTheme} scale="log" domain={['auto', 'auto']} allowDataOverflow />
               <Tooltip {...tooltipTheme} />
-              <Bar dataKey="nodes" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="nodes" radius={[6, 6, 0, 0]} minPointSize={8} />
             </BarChart>
           </ChartWrapper>
 
@@ -419,7 +393,7 @@ const Statistics = () => {
               <XAxis dataKey="name" {...axisTheme} />
               <YAxis {...axisTheme} />
               <Tooltip {...tooltipTheme} />
-              <Bar dataKey="solution" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="solution" radius={[6, 6, 0, 0]} minPointSize={8} />
             </BarChart>
           </ChartWrapper>
 
@@ -429,7 +403,7 @@ const Statistics = () => {
               <XAxis dataKey="name" {...axisTheme} />
               <YAxis {...axisTheme} />
               <Tooltip {...tooltipTheme} />
-              <Bar dataKey="memory" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="memory" radius={[6, 6, 0, 0]} minPointSize={8} />
             </BarChart>
           </ChartWrapper>
         </div>
@@ -444,7 +418,7 @@ const Statistics = () => {
               {selectedLevel === "all" ? "Per-Level Breakdown" : `Per-Test Breakdown: ${selectedLevel.toUpperCase()}`}
             </h2>
             <p className="text-[10px] text-slate-400">
-              {selectedLevel === "all" 
+              {selectedLevel === "all"
                 ? "All difficulty levels side by side — compare how each solver scales"
                 : "Specific test cases side by side — evaluate single board performance"}
             </p>
@@ -455,33 +429,47 @@ const Statistics = () => {
           <LevelGroupedChart
             title={selectedLevel === "all" ? "Search Time by Level" : "Search Time per Test"}
             icon={IconHourglassHigh}
-            subtitle={selectedLevel === "all" ? "Avg. seconds per difficulty (all solvers)" : "Seconds per test case"}
+            subtitle={selectedLevel === "all" ? "Avg. seconds per difficulty (Log Scale)" : "Seconds per test case (Log Scale)"}
             data={processedData.levelTimeData}
+            yAxisLabel="Time (Seconds)"
+            yAxisProps={{ scale: "log", domain: ['auto', 'auto'], allowDataOverflow: true }}
+            formatter={(v) => `${Number(v).toFixed(3)} s`}
+            labelFormatter={(v) => v <= 0.001 ? "0" : Number(v).toFixed(3)}
           />
           <LevelGroupedChart
             title={selectedLevel === "all" ? "Expanded Nodes by Level" : "Expanded Nodes per Test"}
             icon={IconBrain}
-            subtitle={selectedLevel === "all" ? "Avg. nodes explored per difficulty" : "Nodes explored per test case"}
+            subtitle={selectedLevel === "all" ? "Avg. nodes explored per difficulty (Log Scale)" : "Nodes explored per test case (Log Scale)"}
             data={processedData.levelNodeData}
+            yAxisLabel="Nodes"
             yAxisProps={{ scale: "log", domain: ['auto', 'auto'], allowDataOverflow: true }}
+            formatter={(v) => `${Number(v).toLocaleString()} nodes`}
+            labelFormatter={(v) => v === 0 ? "0" : v >= 1000 ? (v / 1000).toFixed(1).replace('.0', '') + 'k' : v}
           />
           <LevelGroupedChart
             title={selectedLevel === "all" ? "Solution Length by Level" : "Solution Length per Test"}
             icon={IconTrophy}
             subtitle={selectedLevel === "all" ? "Avg. moves to solve per difficulty" : "Moves to solve per test case"}
             data={processedData.levelSolutionData}
+            yAxisLabel="Steps"
+            formatter={(v) => `${Number(v).toLocaleString()} moves`}
+            labelFormatter={(v) => v === 0 ? "0" : v}
           />
           <LevelGroupedChart
             title={selectedLevel === "all" ? "Memory Usage by Level" : "Memory Usage per Test"}
             icon={IconHash}
-            subtitle={selectedLevel === "all" ? "Avg. MB used per difficulty" : "MB used per test case"}
+            subtitle={selectedLevel === "all" ? "Avg. MB used per difficulty (Log Scale)" : "MB used per test case (Log Scale)"}
             data={processedData.levelMemoryData}
+            yAxisLabel="Memory (MB)"
+            yAxisProps={{ scale: "log", domain: ['auto', 'auto'], allowDataOverflow: true }}
+            formatter={(v) => `${Number(v).toLocaleString()} MB`}
+            labelFormatter={(v) => v <= 0.001 ? "0" : Number(v).toFixed(3)}
           />
         </div>
 
         {/* History Table */}
-        <HistoryTable 
-          matches={processedData.filteredMatches} 
+        <HistoryTable
+          matches={processedData.filteredMatches}
           showAll={showAllMatches}
           onToggle={() => setShowAllMatches(!showAllMatches)}
         />
