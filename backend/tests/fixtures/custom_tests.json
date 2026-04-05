@@ -7,60 +7,16 @@
       "description": "3 moves to win.",
       "state_data": {
         "cascades": [
-          [
-            "10C"
-          ],
-          [
-            "JD",
-            "5D",
-            "10D"
-          ],
-          [
-            "8S"
-          ],
-          [
-            "7H"
-          ],
-          [
-            "9S",
-            "8D",
-            "7S"
-          ],
-          [
-            "KC",
-            "KH",
-            "9H",
-            "QC",
-            "KS",
-            "QH",
-            "JS"
-          ],
-          [
-            "QS",
-            "JH",
-            "10S",
-            "9D",
-            "8C",
-            "7D",
-            "6C"
-          ],
-          [
-            "KD",
-            "QD",
-            "JC",
-            "10H",
-            "9C",
-            "8H",
-            "7C",
-            "6D"
-          ]
+          ["10C"],
+          ["JD", "5D", "10D"],
+          ["8S"],
+          ["7H"],
+          ["9S", "8D", "7S"],
+          ["KC", "KH", "9H", "QC", "KS", "QH", "JS"],
+          ["QS", "JH", "10S", "9D", "8C", "7D", "6C"],
+          ["KD", "QD", "JC", "10H", "9C", "8H", "7C", "6D"]
         ],
-        "free_cells": [
-          null,
-          null,
-          null,
-          null
-        ],
+        "free_cells": [null,null,null,null],
         "foundations": {
           "SPADES": 6,
           "HEARTS": 6,
@@ -78,36 +34,14 @@
         "cascades": [
           [],
           [],
-          [
-            "QH"
-          ],
-          [
-            "KS",
-            "10H",
-            "KC",
-            "QD",
-            "QC",
-            "JC"
-          ],
-          [
-            "KH",
-            "QS",
-            "JH"
-          ],
-          [
-            "JS"
-          ],
+          ["QH"],
+          ["KS", "10H", "KC", "QD", "QC", "JC"],
+          ["KH", "QS", "JH"],
+          ["JS"],
           [],
-          [
-            "KD"
-          ]
+          ["KD"]
         ],
-        "free_cells": [
-          null,
-          null,
-          null,
-          null
-        ],
+        "free_cells": [null, null, null, null],
         "foundations": {
           "SPADES": 10,
           "HEARTS": 9,
@@ -118,333 +52,101 @@
     },
     {
       "id": "easy-03",
-      "origin_seed": 11987,
+      "origin_seed": 62090,
       "category": "easy",
       "description": "3 moves to win.",
       "state_data": {
         "cascades": [
-          [
-            "10C"
-          ],
-          [
-            "JD",
-            "5D",
-            "10D"
-          ],
-          [
-            "8S"
-          ],
-          [
-            "7H"
-          ],
-          [
-            "9S",
-            "8D",
-            "7S"
-          ],
-          [
-            "KC",
-            "KH",
-            "9H",
-            "QC",
-            "KS",
-            "QH",
-            "JS"
-          ],
-          [
-            "QS",
-            "JH",
-            "10S",
-            "9D",
-            "8C",
-            "7D",
-            "6C"
-          ],
-          [
-            "KD",
-            "QD",
-            "JC",
-            "10H",
-            "9C",
-            "8H",
-            "7C",
-            "6D"
-          ]
+          ["JS", "10H", "9C"],
+          ["8H", "10D"],
+          ["QC", "JD", "10C", "9D", "8C", "7H"],
+          ["KH"],
+          ["KD", "6H", "JH"],
+          ["KC", "QH", "JC"],
+          ["QS", "10S", "9H"],
+          ["KS", "QD"]
         ],
-        "free_cells": [
-          null,
-          null,
-          null,
-          null
-        ],
+        "free_cells": [null,null,null,null],
         "foundations": {
-          "SPADES": 6,
-          "HEARTS": 6,
-          "CLUBS": 5,
-          "DIAMONDS": 4
+          "SPADES": 9,
+          "HEARTS": 5,
+          "CLUBS": 7,
+          "DIAMONDS": 8
         }
       }
     },
     {
-      "id": "medium-01",
-      "origin_seed": 25904,
-      "category": "medium",
+      "id": "hard-01",
+      "origin_seed": 41426,
+      "category": "hard",
       "description": "5 moves to win.",
       "state_data": {
         "cascades": [
-          [
-            "KS",
-            "QH",
-            "JS",
-            "10D"
-          ],
-          [
-            "KH",
-            "7C",
-            "9D"
-          ],
-          [
-            "10S",
-            "9C",
-            "10C",
-            "JC",
-            "10H",
-            "9S",
-            "8H"
-          ],
-          [
-            "JH",
-            "KC",
-            "QD"
-          ],
-          [
-            "QC"
-          ],
-          [
-            "8C",
-            "8D",
-            "9H"
-          ],
-          [
-            "KD",
-            "QS",
-            "JD"
-          ],
+          ["9H", "8D", "7S", "6H"],
+          ["KS", "6S", "5H", "QS", "7D", "KH"],
+          ["KC", "QD", "JS", "10H", "9C", "8H", "7C", "6D", "5S"],
+          ["JC", "10D", "9S"],
+          [],
+          ["JD", "8C", "QH", "4H", "10C"],
+          ["KD", "QC", "JH", "10S", "9D", "8S", "7H", "6C"],
           []
         ],
-        "free_cells": [
-          null,
-          null,
-          null,
-          null
-        ],
+        "free_cells": [null, null, null, null],
         "foundations": {
-          "SPADES": 8,
-          "HEARTS": 7,
-          "CLUBS": 6,
-          "DIAMONDS": 7
+          "SPADES": 4,
+          "HEARTS": 3,
+          "CLUBS": 5,
+          "DIAMONDS": 5
         }
       }
     },
     {
-      "id": "medium-02",
+      "id": "hard-02",
       "origin_seed": 5152,
-      "category": "medium",
+      "category": "hard",
       "description": "5 moves to win.",
       "state_data": {
         "cascades": [
-          [
-            "KH",
-            "QS"
-          ],
-          [
-            "KD",
-            "QC",
-            "JH",
-            "10S"
-          ],
-          [
-            "10D",
-            "9D",
-            "5C",
-            "9H",
-            "7C"
-          ],
-          [
-            "QH",
-            "8C",
-            "8S",
-            "6D",
-            "8D"
-          ],
-          [
-            "6H"
-          ],
-          [
-            "KS",
-            "QD",
-            "JS",
-            "10H",
-            "9C",
-            "8H"
-          ],
-          [
-            "KC",
-            "7H",
-            "JD",
-            "10C"
-          ],
-          [
-            "9S",
-            "JC",
-            "7D",
-            "6C"
-          ]
+          ["KH", "QS"],
+          ["KD","QC","JH","10S"],
+          ["10D","9D","5C","9H","7C"],
+          ["QH","8C","8S","6D","8D"],
+          ["6H"],
+          ["KS","QD","JS","10H","9C","8H"],
+          ["KC","7H","JD","10C"],
+          ["9S","JC","7D","6C"]
         ],
-        "free_cells": [
-          null,
-          null,
-          null,
-          null
-        ],
+        "free_cells": [null,null,null,null],
         "foundations": {
           "SPADES": 7,
-          "HEARTS": 6,
+          "HEARTS": 5,
           "CLUBS": 4,
           "DIAMONDS": 5
         }
       }
     },
     {
-      "id": "medium-03",
+      "id": "hard-03",
       "origin_seed": 11987,
-      "category": "medium",
+      "category": "hard",
       "description": "5 moves to win.",
       "state_data": {
         "cascades": [
           [],
-          [
-            "JD",
-            "5D",
-            "10D",
-            "10C",
-            "6C"
-          ],
-          [
-            "8S"
-          ],
-          [
-            "7H"
-          ],
-          [
-            "9S",
-            "8D",
-            "7S"
-          ],
-          [
-            "KC",
-            "KH",
-            "9H",
-            "QC",
-            "KS",
-            "QH",
-            "JS"
-          ],
-          [
-            "QS",
-            "JH",
-            "10S",
-            "9D",
-            "8C",
-            "7D"
-          ],
-          [
-            "KD",
-            "QD",
-            "JC",
-            "10H",
-            "9C",
-            "8H",
-            "7C",
-            "6D"
-          ]
+          ["JD", "5D", "10D", "10C", "6C"],
+          ["8S"],
+          ["7H"],
+          ["9S", "8D", "7S"],
+          ["KC", "KH", "9H", "QC", "KS", "QH", "JS"],
+          ["QS", "JH", "10S", "9D", "8C", "7D"],
+          ["KD", "QD", "JC", "10H", "9C", "8H", "7C", "6D"]
         ],
-        "free_cells": [
-          null,
-          null,
-          null,
-          null
-        ],
+        "free_cells": [null,null,null,null],
         "foundations": {
           "SPADES": 6,
           "HEARTS": 6,
           "CLUBS": 5,
           "DIAMONDS": 4
-        }
-      }
-    },
-    {
-      "id": "hard-01",
-      "origin_seed": 25904,
-      "category": "hard",
-      "description": "10 moves to win.",
-      "state_data": {
-        "cascades": [
-          [],
-          [
-            "KH",
-            "7C",
-            "9D",
-            "8S",
-            "QC"
-          ],
-          [
-            "10S",
-            "9C",
-            "10C",
-            "JC",
-            "10H",
-            "9S"
-          ],
-          [
-            "JH",
-            "KC",
-            "QD"
-          ],
-          [
-            "6H",
-            "KS",
-            "7S",
-            "8H"
-          ],
-          [
-            "8C",
-            "8D",
-            "9H",
-            "QH",
-            "JS",
-            "10D"
-          ],
-          [
-            "KD",
-            "QS",
-            "JD"
-          ],
-          [
-            "7H"
-          ]
-        ],
-        "free_cells": [
-          null,
-          null,
-          null,
-          null
-        ],
-        "foundations": {
-          "SPADES": 6,
-          "HEARTS": 5,
-          "CLUBS": 6,
-          "DIAMONDS": 7
         }
       }
     }

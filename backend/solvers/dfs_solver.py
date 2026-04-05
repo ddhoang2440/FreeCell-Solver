@@ -44,7 +44,7 @@ class DFSSolver(BaseSolver):
         except Exception:
             pass
 
-    def solve(self, node_limit: int = 200000, max_time: int = 300) -> Optional[List[Tuple]]:
+    def solve(self, node_limit: int = 2000000, max_time: int = 300) -> Optional[List[Tuple]]:
         """Depth-First Search"""
         self.visited.clear()
         self.stack.clear()

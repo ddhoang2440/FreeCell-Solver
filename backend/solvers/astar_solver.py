@@ -178,7 +178,7 @@ class AStarSolver(BaseSolver):
         else:
             return f"~{int(estimated_seconds/3600)}h"
         
-    def solve(self, node_limit: int = 200000, max_time: int = 300) -> Optional[List[Tuple]]:
+    def solve(self, node_limit: int = 2000000, max_time: int = 300) -> Optional[List[Tuple]]:
         self.priority_queue.clear()
         self.g_score.clear()
         self.f_score.clear()

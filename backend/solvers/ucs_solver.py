@@ -2,8 +2,8 @@ import heapq
 import time
 from typing import Dict, List, Optional, Tuple
 
-from backend.game_state import FreeCellState
-from backend.solvers.base_solver import BaseSolver
+from game_state import FreeCellState
+from solvers.base_solver import BaseSolver
 
 
 class UCSSolver(BaseSolver):
@@ -286,7 +286,7 @@ class UCSSolver(BaseSolver):
     # ------------------------------------------------------------------ #
     #  Main search                                                         #
     # ------------------------------------------------------------------ #
-    def solve(self, node_limit: int = 200000,
+    def solve(self, node_limit: int = 2000000,
               max_time: int = 300) -> Optional[List[Tuple]]:
         """
         UCS chuẩn với:

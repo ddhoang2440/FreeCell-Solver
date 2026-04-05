@@ -27,6 +27,7 @@ const Game = () => {
   const [dragSource, setDragSource] = useState(null);
 
   const [showSolverDialog, setShowSolverDialog] = useState(false);
+  const [showWinDialog, setShowWinDialog] = useState(false);
   const [solverResults, setSolverResults] = useState(null);
   const [solving, setSolving] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -215,6 +216,7 @@ const Game = () => {
       setSolving(false);
       setSolverResults(null);
       setShowSolverDialog(false);
+      setShowWinDialog(false);
       setSolverProgress({
         progress: 0,
         nodesExplored: 0,
@@ -259,6 +261,7 @@ const Game = () => {
 
         if (response.data.is_goal) {
           setStatusMessage("You won!");
+          setShowWinDialog(true);
         }
       } else {
         setStatusMessage(`${response.data.error || "Invalid move!"}`);
@@ -292,6 +295,7 @@ const Game = () => {
         setGameState(response.data.state);
         setStatusMessage("Game restarted");
         setSelectedCards([]);
+        setShowWinDialog(false);
       }
     } catch (err) {
       setStatusMessage("Failed to restart");
@@ -313,6 +317,7 @@ const Game = () => {
         setGameState(response.data.state);
         setStatusMessage("Undo last move");
         setSelectedCards([]);
+        setShowWinDialog(false);
       }
     } catch (err) {
       setStatusMessage("No moves to undo");
@@ -372,6 +377,7 @@ const Game = () => {
 
           if (response.data.is_goal) {
             setStatusMessage("🎉 You Win!");
+            setShowWinDialog(true);
             break;
           }
         }
@@ -1543,6 +1549,25 @@ const Game = () => {
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {showWinDialog && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[100] p-4">
+          <div className="bg-white/10 border border-white/20 backdrop-blur-xl p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 max-w-sm w-full animate-in fade-in zoom-in duration-500">
+            <div className="text-6xl mb-4 animate-bounce">🎉</div>
+            <h2 className="text-4xl font-black text-amber-400 uppercase tracking-widest drop-shadow-md text-center mb-4">You Win!</h2>
+            <div className="flex gap-4 w-full">
+              <button onClick={() => { setShowWinDialog(false); handleRestart(); }} className="btn-modern btn-secondary flex-1 py-3 text-sm">Play Again</button>
+              <button onClick={() => { setShowWinDialog(false); handleNewGame(); }} className="btn-modern btn-primary flex-1 py-3 text-sm">New Game</button>
+            </div>
+            <button
+               onClick={() => setShowWinDialog(false)}
+               className="mt-4 text-white/50 text-sm hover:text-white transition-colors uppercase tracking-widest font-bold"
+            >
+               Close overlay
+            </button>
           </div>
         </div>
       )}

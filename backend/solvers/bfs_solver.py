@@ -39,7 +39,7 @@ class BFSSolver(BaseSolver):
             })
         except Exception: pass
 
-    def solve(self, node_limit: int = 200000, max_time: int = 300) -> Optional[List[Tuple]]:
+    def solve(self, node_limit: int = 500000, max_time: int = 300) -> Optional[List[Tuple]]:
         """BFS chuẩn - Tìm đường đi ngắn nhất dựa trên số quyết định của AI."""
         self.queue.clear()
         self.parent_map.clear()
@@ -84,8 +84,14 @@ class BFSSolver(BaseSolver):
 
                 if self.expanded_nodes % 1000 == 0:
                     self._send_progress(current_state, current_depth)
-                    if verbose:
-                        print(f"Nodes: {self.expanded_nodes}, Queue: {len(self.queue)}, Depth: {current_depth}")
+                    elapsed = time.time() - self.start_time
+                    rate = self.expanded_nodes / elapsed if elapsed > 0 else 0
+                    print(
+                        f"[BFS] Nodes: {self.expanded_nodes:,}, "
+                        f"Rate: {rate:.0f} n/s, "
+                        f"Queue: {len(self.queue):,}, "
+                        f"Depth: {current_depth}"
+                    )
 
                 # Duyệt tất cả các nước đi có thể
                 for move in current_state.get_all_moves():

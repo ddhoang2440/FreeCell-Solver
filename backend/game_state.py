@@ -696,6 +696,9 @@ class FreeCellState:
             else:
                 new_state.move_history = [detailed_move]
 
+            new_state._cached_moves = None
+            new_state._cached_moves_with_foundation = None
+            new_state._hash = None
             return new_state
             
         except IndexError:
